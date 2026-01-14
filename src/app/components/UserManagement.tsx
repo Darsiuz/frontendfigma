@@ -5,7 +5,7 @@ interface AppUser {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'manager' | 'operator';
+  role: 'admin' | 'manager' | 'operator' | 'auditor';
   status: 'active' | 'inactive';
   createdAt: string;
 }
@@ -23,7 +23,7 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    role: 'operator' as 'admin' | 'manager' | 'operator',
+    role: 'operator' as 'admin' | 'manager' | 'operator' | 'auditor',
     status: 'active' as 'active' | 'inactive',
   });
 
@@ -63,7 +63,8 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
     const roles: { [key: string]: string } = {
       admin: 'Administrador',
       manager: 'Gerente',
-      operator: 'Operador'
+      operator: 'Operador',
+      auditor: 'Auditor'
     };
     return roles[role] || role;
   };
@@ -72,7 +73,8 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
     const colors: { [key: string]: string } = {
       admin: 'bg-purple-100 text-purple-800',
       manager: 'bg-blue-100 text-blue-800',
-      operator: 'bg-green-100 text-green-800'
+      operator: 'bg-green-100 text-green-800',
+      auditor: 'bg-gray-100 text-gray-800'
     };
     return colors[role] || 'bg-gray-100 text-gray-800';
   };
@@ -81,7 +83,8 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
     const permissions: { [key: string]: string[] } = {
       admin: ['Acceso completo', 'Gestión de usuarios', 'Reportes', 'Configuración'],
       manager: ['Dashboard', 'Gestión de inventario', 'Movimientos', 'Reportes'],
-      operator: ['Dashboard', 'Ver inventario', 'Ver movimientos']
+      operator: ['Dashboard', 'Ver inventario', 'Ver movimientos'],
+      auditor: ['Dashboard', 'Ver inventario', 'Ver movimientos', 'Reportes']
     };
     return permissions[role] || [];
   };
@@ -333,6 +336,7 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
                   <option value="operator">Operador</option>
                   <option value="manager">Gerente</option>
                   <option value="admin">Administrador</option>
+                  <option value="auditor">Auditor</option>
                 </select>
                 <p className="text-xs text-gray-500 mt-1">
                   Permisos: {getRolePermissions(formData.role).join(', ')}

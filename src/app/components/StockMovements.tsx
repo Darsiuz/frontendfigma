@@ -23,7 +23,7 @@ interface Movement {
 }
 
 interface User {
-  role: 'admin' | 'manager' | 'operator';
+  role: 'admin' | 'manager' | 'operator' | 'auditor';
   name: string;
 }
 

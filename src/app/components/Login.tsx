@@ -22,8 +22,9 @@ export function Login({ onLogin }: LoginProps) {
 
   const demoUsers = [
     { email: 'admin@warehouse.com', password: 'admin123', role: 'Administrador' },
-    { email: 'manager@warehouse.com', password: 'manager123', role: 'Gerente' },
+    { email: 'manager@warehouse.com', password: 'manager123', role: 'Manager' },
     { email: 'operator@warehouse.com', password: 'operator123', role: 'Operador' },
+    { email: 'auditor@warehouse.com', password: 'auditor123', role: 'Auditor' },
   ];
 
   return (

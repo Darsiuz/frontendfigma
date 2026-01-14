@@ -7,6 +7,9 @@ import { StockMovements } from '@/app/components/StockMovements';
 import { UserManagement } from '@/app/components/UserManagement';
 import { Reports } from '@/app/components/Reports';
 import { ProductForm } from '@/app/components/ProductForm';
+import { SystemSettings } from '@/app/components/SystemSettings';
+import { IncidentManagement } from '@/app/components/IncidentManagement';
+import { ApproveMovements } from '@/app/components/ApproveMovements';
 
 interface Product {
   id: string;
@@ -27,11 +30,28 @@ interface Movement {
   date: string;
   reason: string;
   user: string;
+  status: 'pendiente' | 'aprobado' | 'rechazado';
+  reviewedBy?: string;
+  reviewedAt?: string;
+}
+
+interface Incident {
+  id: string;
+  productId: string;
+  productName: string;
+  type: 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro';
+  quantity: number;
+  description: string;
+  status: 'pendiente' | 'resuelto' | 'rechazado';
+  reportedBy: string;
+  reportedAt: string;
+  resolvedBy?: string;
+  resolvedAt?: string;
 }
 
 interface User {
   email: string;
-  role: 'admin' | 'manager' | 'operator';
+  role: 'admin' | 'manager' | 'operator' | 'auditor';
   name: string;
 }
 
@@ -39,185 +59,65 @@ interface AppUser {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'manager' | 'operator';
+  role: 'admin' | 'manager' | 'operator' | 'auditor';
   status: 'active' | 'inactive';
   createdAt: string;
 }
 
-type View = 'dashboard' | 'inventory' | 'movements' | 'users' | 'reports';
+interface SystemConfig {
+  companyName: string;
+  lowStockThreshold: number;
+  currency: string;
+  autoApproveMovements: boolean;
+  requireIncidentApproval: boolean;
+  enableNotifications: boolean;
+  defaultLocation: string;
+  maxStockPerProduct: number;
+}
+
+type View = 'dashboard' | 'inventory' | 'users' | 'settings' | 'reports' | 
+            'supervise' | 'approve' | 'incidents' | 'manager-reports' |
+            'register-entry' | 'register-exit' | 'consult-inventory' | 'report-incident' |
+            'audit-inventory' | 'audit-movements' | 'audit-reports' | 'export-audit';
 
 // Usuarios del sistema
 const systemUsers = [
   { email: 'admin@warehouse.com', password: 'admin123', role: 'admin' as const, name: 'Admin Principal' },
-  { email: 'manager@warehouse.com', password: 'manager123', role: 'manager' as const, name: 'Gerente López' },
+  { email: 'manager@warehouse.com', password: 'manager123', role: 'manager' as const, name: 'Manager López' },
   { email: 'operator@warehouse.com', password: 'operator123', role: 'operator' as const, name: 'Operador García' },
+  { email: 'auditor@warehouse.com', password: 'auditor123', role: 'auditor' as const, name: 'Auditor Martínez' },
 ];
 
-// Datos iniciales de productos
+// Datos iniciales
 const initialProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Laptop HP Pavilion 15',
-    category: 'Electrónica',
-    quantity: 15,
-    minStock: 5,
-    price: 899.99,
-    location: 'Pasillo A, Estante 1'
-  },
-  {
-    id: '2',
-    name: 'Mouse Logitech MX Master',
-    category: 'Accesorios',
-    quantity: 45,
-    minStock: 20,
-    price: 79.99,
-    location: 'Pasillo B, Estante 3'
-  },
-  {
-    id: '3',
-    name: 'Teclado Mecánico RGB',
-    category: 'Accesorios',
-    quantity: 3,
-    minStock: 10,
-    price: 149.99,
-    location: 'Pasillo B, Estante 2'
-  },
-  {
-    id: '4',
-    name: 'Monitor Dell UltraSharp 27"',
-    category: 'Electrónica',
-    quantity: 8,
-    minStock: 5,
-    price: 329.99,
-    location: 'Pasillo A, Estante 2'
-  },
-  {
-    id: '5',
-    name: 'Silla Ergonómica Executive',
-    category: 'Mobiliario',
-    quantity: 12,
-    minStock: 5,
-    price: 299.99,
-    location: 'Bodega Principal'
-  },
-  {
-    id: '6',
-    name: 'Impresora Multifuncional',
-    category: 'Electrónica',
-    quantity: 6,
-    minStock: 3,
-    price: 249.99,
-    location: 'Pasillo C, Estante 1'
-  },
-  {
-    id: '7',
-    name: 'Webcam HD 1080p',
-    category: 'Accesorios',
-    quantity: 25,
-    minStock: 10,
-    price: 59.99,
-    location: 'Pasillo B, Estante 1'
-  },
-  {
-    id: '8',
-    name: 'Escritorio Ajustable',
-    category: 'Mobiliario',
-    quantity: 4,
-    minStock: 5,
-    price: 449.99,
-    location: 'Bodega Principal'
-  }
+  { id: '1', name: 'Laptop HP Pavilion 15', category: 'Electrónica', quantity: 15, minStock: 5, price: 899.99, location: 'Pasillo A, Estante 1' },
+  { id: '2', name: 'Mouse Logitech MX Master', category: 'Accesorios', quantity: 45, minStock: 20, price: 79.99, location: 'Pasillo B, Estante 3' },
+  { id: '3', name: 'Teclado Mecánico RGB', category: 'Accesorios', quantity: 3, minStock: 10, price: 149.99, location: 'Pasillo B, Estante 2' },
+  { id: '4', name: 'Monitor Dell 27"', category: 'Electrónica', quantity: 8, minStock: 5, price: 329.99, location: 'Pasillo A, Estante 2' },
+  { id: '5', name: 'Silla Ergonómica', category: 'Mobiliario', quantity: 12, minStock: 5, price: 299.99, location: 'Bodega Principal' },
+  { id: '6', name: 'Impresora Multifuncional', category: 'Electrónica', quantity: 6, minStock: 3, price: 249.99, location: 'Pasillo C, Estante 1' },
+  { id: '7', name: 'Webcam HD 1080p', category: 'Accesorios', quantity: 25, minStock: 10, price: 59.99, location: 'Pasillo B, Estante 1' },
+  { id: '8', name: 'Escritorio Ajustable', category: 'Mobiliario', quantity: 4, minStock: 5, price: 449.99, location: 'Bodega Principal' }
 ];
 
-// Movimientos iniciales
-const initialMovements: Movement[] = [
-  {
-    id: '1',
-    productId: '1',
-    productName: 'Laptop HP Pavilion 15',
-    type: 'entrada',
-    quantity: 10,
-    date: new Date(2026, 0, 5).toISOString(),
-    reason: 'Compra a proveedor principal',
-    user: 'Admin Principal'
-  },
-  {
-    id: '2',
-    productId: '2',
-    productName: 'Mouse Logitech MX Master',
-    type: 'salida',
-    quantity: 15,
-    date: new Date(2026, 0, 8).toISOString(),
-    reason: 'Venta corporativa - Empresa XYZ',
-    user: 'Gerente López'
-  },
-  {
-    id: '3',
-    productId: '3',
-    productName: 'Teclado Mecánico RGB',
-    type: 'salida',
-    quantity: 7,
-    date: new Date(2026, 0, 10).toISOString(),
-    reason: 'Pedido online - Cliente Premium',
-    user: 'Operador García'
-  },
-  {
-    id: '4',
-    productId: '4',
-    productName: 'Monitor Dell UltraSharp 27"',
-    type: 'entrada',
-    quantity: 5,
-    date: new Date(2026, 0, 11).toISOString(),
-    reason: 'Reposición de stock',
-    user: 'Gerente López'
-  },
-  {
-    id: '5',
-    productId: '7',
-    productName: 'Webcam HD 1080p',
-    type: 'entrada',
-    quantity: 20,
-    date: new Date(2026, 0, 12).toISOString(),
-    reason: 'Nueva adquisición',
-    user: 'Admin Principal'
-  }
-];
-
-// Usuarios de la aplicación
 const initialAppUsers: AppUser[] = [
-  {
-    id: '1',
-    name: 'Admin Principal',
-    email: 'admin@warehouse.com',
-    role: 'admin',
-    status: 'active',
-    createdAt: new Date(2025, 0, 1).toISOString()
-  },
-  {
-    id: '2',
-    name: 'Gerente López',
-    email: 'manager@warehouse.com',
-    role: 'manager',
-    status: 'active',
-    createdAt: new Date(2025, 1, 15).toISOString()
-  },
-  {
-    id: '3',
-    name: 'Operador García',
-    email: 'operator@warehouse.com',
-    role: 'operator',
-    status: 'active',
-    createdAt: new Date(2025, 2, 10).toISOString()
-  },
-  {
-    id: '4',
-    name: 'María González',
-    email: 'maria.gonzalez@warehouse.com',
-    role: 'operator',
-    status: 'active',
-    createdAt: new Date(2025, 5, 20).toISOString()
-  }
+  { id: '1', name: 'Admin Principal', email: 'admin@warehouse.com', role: 'admin', status: 'active', createdAt: new Date(2025, 0, 1).toISOString() },
+  { id: '2', name: 'Manager López', email: 'manager@warehouse.com', role: 'manager', status: 'active', createdAt: new Date(2025, 1, 15).toISOString() },
+  { id: '3', name: 'Operador García', email: 'operator@warehouse.com', role: 'operator', status: 'active', createdAt: new Date(2025, 2, 10).toISOString() },
+  { id: '4', name: 'Auditor Martínez', email: 'auditor@warehouse.com', role: 'auditor', status: 'active', createdAt: new Date(2025, 3, 5).toISOString() },
+  { id: '5', name: 'María González', email: 'maria.gonzalez@warehouse.com', role: 'operator', status: 'active', createdAt: new Date(2025, 5, 20).toISOString() }
 ];
+
+const defaultConfig: SystemConfig = {
+  companyName: 'Almacén Central',
+  lowStockThreshold: 20,
+  currency: 'USD',
+  autoApproveMovements: false,
+  requireIncidentApproval: true,
+  enableNotifications: true,
+  defaultLocation: 'Almacén Principal',
+  maxStockPerProduct: 1000
+};
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -227,35 +127,27 @@ function App() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [movements, setMovements] = useState<Movement[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
   const [appUsers, setAppUsers] = useState<AppUser[]>([]);
+  const [systemConfig, setSystemConfig] = useState<SystemConfig>(defaultConfig);
   
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  // Cargar datos desde localStorage
+  // Cargar datos
   useEffect(() => {
     const savedProducts = localStorage.getItem('warehouse_products');
     const savedMovements = localStorage.getItem('warehouse_movements');
+    const savedIncidents = localStorage.getItem('warehouse_incidents');
     const savedAppUsers = localStorage.getItem('warehouse_app_users');
+    const savedConfig = localStorage.getItem('warehouse_config');
     const savedUser = localStorage.getItem('warehouse_current_user');
 
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
-    } else {
-      setProducts(initialProducts);
-    }
-
-    if (savedMovements) {
-      setMovements(JSON.parse(savedMovements));
-    } else {
-      setMovements(initialMovements);
-    }
-
-    if (savedAppUsers) {
-      setAppUsers(JSON.parse(savedAppUsers));
-    } else {
-      setAppUsers(initialAppUsers);
-    }
+    setProducts(savedProducts ? JSON.parse(savedProducts) : initialProducts);
+    setMovements(savedMovements ? JSON.parse(savedMovements) : []);
+    setIncidents(savedIncidents ? JSON.parse(savedIncidents) : []);
+    setAppUsers(savedAppUsers ? JSON.parse(savedAppUsers) : initialAppUsers);
+    setSystemConfig(savedConfig ? JSON.parse(savedConfig) : defaultConfig);
 
     if (savedUser) {
       const user = JSON.parse(savedUser);
@@ -264,24 +156,12 @@ function App() {
     }
   }, []);
 
-  // Guardar datos en localStorage
-  useEffect(() => {
-    if (products.length > 0) {
-      localStorage.setItem('warehouse_products', JSON.stringify(products));
-    }
-  }, [products]);
-
-  useEffect(() => {
-    if (movements.length > 0) {
-      localStorage.setItem('warehouse_movements', JSON.stringify(movements));
-    }
-  }, [movements]);
-
-  useEffect(() => {
-    if (appUsers.length > 0) {
-      localStorage.setItem('warehouse_app_users', JSON.stringify(appUsers));
-    }
-  }, [appUsers]);
+  // Guardar datos
+  useEffect(() => { if (products.length > 0) localStorage.setItem('warehouse_products', JSON.stringify(products)); }, [products]);
+  useEffect(() => { if (movements.length > 0) localStorage.setItem('warehouse_movements', JSON.stringify(movements)); }, [movements]);
+  useEffect(() => { if (incidents.length > 0) localStorage.setItem('warehouse_incidents', JSON.stringify(incidents)); }, [incidents]);
+  useEffect(() => { if (appUsers.length > 0) localStorage.setItem('warehouse_app_users', JSON.stringify(appUsers)); }, [appUsers]);
+  useEffect(() => { localStorage.setItem('warehouse_config', JSON.stringify(systemConfig)); }, [systemConfig]);
 
   const handleLogin = (email: string, password: string) => {
     const user = systemUsers.find(u => u.email === email && u.password === password);
@@ -304,20 +184,13 @@ function App() {
 
   // Gestión de productos
   const handleAddProduct = (productData: Omit<Product, 'id'>) => {
-    const newProduct: Product = {
-      ...productData,
-      id: Date.now().toString(),
-    };
+    const newProduct: Product = { ...productData, id: Date.now().toString() };
     setProducts([...products, newProduct]);
   };
 
   const handleEditProduct = (productData: Omit<Product, 'id'>) => {
     if (editingProduct) {
-      setProducts(products.map(p => 
-        p.id === editingProduct.id 
-          ? { ...productData, id: editingProduct.id }
-          : p
-      ));
+      setProducts(products.map(p => p.id === editingProduct.id ? { ...productData, id: editingProduct.id } : p));
       setEditingProduct(null);
     }
   };
@@ -326,18 +199,8 @@ function App() {
     setProducts(products.filter(p => p.id !== id));
   };
 
-  const openEditProductForm = (product: Product) => {
-    setEditingProduct(product);
-    setIsProductFormOpen(true);
-  };
-
-  const closeProductForm = () => {
-    setIsProductFormOpen(false);
-    setEditingProduct(null);
-  };
-
   // Gestión de movimientos
-  const handleAddMovement = (movementData: Omit<Movement, 'id' | 'date' | 'productName' | 'user'>) => {
+  const handleAddMovement = (movementData: Omit<Movement, 'id' | 'date' | 'productName' | 'user' | 'status'>) => {
     const product = products.find(p => p.id === movementData.productId);
     if (!product || !currentUser) return;
 
@@ -347,52 +210,145 @@ function App() {
       productName: product.name,
       date: new Date().toISOString(),
       user: currentUser.name,
+      status: systemConfig.autoApproveMovements ? 'aprobado' : 'pendiente'
     };
 
-    // Actualizar cantidad del producto
+    // Si está aprobado automáticamente, actualizar stock
+    if (systemConfig.autoApproveMovements) {
+      const updatedProducts = products.map(p => {
+        if (p.id === movementData.productId) {
+          const newQuantity = movementData.type === 'entrada'
+            ? p.quantity + movementData.quantity
+            : p.quantity - movementData.quantity;
+          return { ...p, quantity: Math.max(0, newQuantity) };
+        }
+        return p;
+      });
+      setProducts(updatedProducts);
+    }
+
+    setMovements([...movements, newMovement]);
+  };
+
+  const handleApproveMovement = (id: string) => {
+    const movement = movements.find(m => m.id === id);
+    if (!movement || !currentUser) return;
+
+    // Actualizar stock
     const updatedProducts = products.map(p => {
-      if (p.id === movementData.productId) {
-        const newQuantity = movementData.type === 'entrada'
-          ? p.quantity + movementData.quantity
-          : p.quantity - movementData.quantity;
+      if (p.id === movement.productId) {
+        const newQuantity = movement.type === 'entrada'
+          ? p.quantity + movement.quantity
+          : p.quantity - movement.quantity;
         return { ...p, quantity: Math.max(0, newQuantity) };
       }
       return p;
     });
 
     setProducts(updatedProducts);
-    setMovements([...movements, newMovement]);
+    setMovements(movements.map(m => 
+      m.id === id 
+        ? { ...m, status: 'aprobado', reviewedBy: currentUser.name, reviewedAt: new Date().toISOString() }
+        : m
+    ));
   };
 
-  // Gestión de usuarios de la aplicación
-  const handleAddAppUser = (userData: Omit<AppUser, 'id' | 'createdAt'>) => {
-    const newUser: AppUser = {
-      ...userData,
+  const handleRejectMovement = (id: string) => {
+    if (!currentUser) return;
+    setMovements(movements.map(m => 
+      m.id === id 
+        ? { ...m, status: 'rechazado', reviewedBy: currentUser.name, reviewedAt: new Date().toISOString() }
+        : m
+    ));
+  };
+
+  // Gestión de incidencias
+  const handleAddIncident = (incidentData: Omit<Incident, 'id' | 'reportedAt' | 'reportedBy' | 'status'>) => {
+    const product = products.find(p => p.id === incidentData.productId);
+    if (!product || !currentUser) return;
+
+    const newIncident: Incident = {
+      ...incidentData,
       id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
+      productName: product.name,
+      reportedBy: currentUser.name,
+      reportedAt: new Date().toISOString(),
+      status: 'pendiente'
     };
+
+    setIncidents([...incidents, newIncident]);
+  };
+
+  const handleResolveIncident = (id: string, status: 'resuelto' | 'rechazado') => {
+    const incident = incidents.find(i => i.id === id);
+    if (!incident || !currentUser) return;
+
+    // Si se resuelve, ajustar el stock
+    if (status === 'resuelto') {
+      const updatedProducts = products.map(p => {
+        if (p.id === incident.productId) {
+          return { ...p, quantity: Math.max(0, p.quantity - incident.quantity) };
+        }
+        return p;
+      });
+      setProducts(updatedProducts);
+    }
+
+    setIncidents(incidents.map(i => 
+      i.id === id 
+        ? { ...i, status, resolvedBy: currentUser.name, resolvedAt: new Date().toISOString() }
+        : i
+    ));
+  };
+
+  // Gestión de usuarios
+  const handleAddAppUser = (userData: Omit<AppUser, 'id' | 'createdAt'>) => {
+    const newUser: AppUser = { ...userData, id: Date.now().toString(), createdAt: new Date().toISOString() };
     setAppUsers([...appUsers, newUser]);
   };
 
   const handleEditAppUser = (id: string, userData: Omit<AppUser, 'id' | 'createdAt'>) => {
-    setAppUsers(appUsers.map(u => 
-      u.id === id 
-        ? { ...userData, id, createdAt: u.createdAt }
-        : u
-    ));
+    setAppUsers(appUsers.map(u => u.id === id ? { ...userData, id, createdAt: u.createdAt } : u));
   };
 
   const handleDeleteAppUser = (id: string) => {
     setAppUsers(appUsers.filter(u => u.id !== id));
   };
 
+  // Configuración del sistema
+  const handleSaveConfig = (config: SystemConfig) => {
+    setSystemConfig(config);
+  };
+
   if (!isLoggedIn || !currentUser) {
     return <Login onLogin={handleLogin} />;
   }
 
+  const getViewTitle = () => {
+    const titles: { [key: string]: string } = {
+      dashboard: 'Dashboard General',
+      inventory: 'Gestionar Inventario',
+      users: 'Gestionar Usuarios',
+      settings: 'Configuración del Sistema',
+      reports: 'Reportes Generales',
+      supervise: 'Supervisar Inventario',
+      approve: 'Aprobar Movimientos',
+      incidents: 'Ajustar por Incidencias',
+      'manager-reports': 'Reportes de Inventario',
+      'register-entry': 'Registrar Entradas',
+      'register-exit': 'Registrar Salidas',
+      'consult-inventory': 'Consultar Inventario',
+      'report-incident': 'Registrar Incidencias',
+      'audit-inventory': 'Consultar Inventario',
+      'audit-movements': 'Historial de Movimientos',
+      'audit-reports': 'Generar Reportes',
+      'export-audit': 'Exportar para Auditoría'
+    };
+    return titles[currentView] || 'Dashboard';
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
       <Sidebar
         currentView={currentView}
         onNavigate={setCurrentView}
@@ -402,86 +358,46 @@ function App() {
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
         <header className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {currentView === 'dashboard' && 'Dashboard General'}
-                {currentView === 'inventory' && 'Gestión de Inventario'}
-                {currentView === 'movements' && 'Movimientos de Stock'}
-                {currentView === 'users' && 'Gestión de Usuarios'}
-                {currentView === 'reports' && 'Reportes'}
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                Bienvenido, {currentUser.name}
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{currentUser.name}</p>
-                <p className="text-xs text-gray-500">
-                  {currentUser.role === 'admin' && 'Administrador'}
-                  {currentUser.role === 'manager' && 'Gerente'}
-                  {currentUser.role === 'operator' && 'Operador'}
-                </p>
-              </div>
+              <h1 className="text-2xl font-bold text-gray-900">{getViewTitle()}</h1>
+              <p className="text-sm text-gray-600 mt-1">Bienvenido, {currentUser.name}</p>
             </div>
           </div>
         </header>
 
-        {/* Content area */}
         <main className="flex-1 overflow-y-auto p-6">
-          {currentView === 'dashboard' && (
-            <DashboardView products={products} movements={movements} />
-          )}
-
-          {currentView === 'inventory' && (
-            <InventoryManagement
-              products={products}
-              onEdit={openEditProductForm}
-              onDelete={handleDeleteProduct}
-              onAdd={() => {
-                setEditingProduct(null);
-                setIsProductFormOpen(true);
-              }}
-              user={currentUser}
-            />
-          )}
-
-          {currentView === 'movements' && (
-            <StockMovements
-              products={products}
-              movements={movements}
-              onAddMovement={handleAddMovement}
-              user={currentUser}
-            />
-          )}
-
-          {currentView === 'users' && currentUser.role === 'admin' && (
-            <UserManagement
-              users={appUsers}
-              onAddUser={handleAddAppUser}
-              onEditUser={handleEditAppUser}
-              onDeleteUser={handleDeleteAppUser}
-            />
-          )}
-
-          {currentView === 'reports' && (currentUser.role === 'admin' || currentUser.role === 'manager') && (
-            <Reports products={products} movements={movements} />
-          )}
+          {currentView === 'dashboard' && <DashboardView products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+          
+          {/* Admin */}
+          {currentView === 'inventory' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}
+          {currentView === 'users' && <UserManagement users={appUsers} onAddUser={handleAddAppUser} onEditUser={handleEditAppUser} onDeleteUser={handleDeleteAppUser} />}
+          {currentView === 'settings' && <SystemSettings config={systemConfig} onSave={handleSaveConfig} />}
+          {currentView === 'reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+          
+          {/* Manager */}
+          {currentView === 'supervise' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}
+          {currentView === 'approve' && <ApproveMovements movements={movements} onApprove={handleApproveMovement} onReject={handleRejectMovement} />}
+          {currentView === 'incidents' && <IncidentManagement products={products} incidents={incidents} onAddIncident={handleAddIncident} onResolveIncident={handleResolveIncident} user={currentUser} />}
+          {currentView === 'manager-reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+          
+          {/* Operator */}
+          {currentView === 'register-entry' && <StockMovements products={products} movements={movements.filter(m => m.status === 'aprobado')} onAddMovement={handleAddMovement} user={currentUser} />}
+          {currentView === 'register-exit' && <StockMovements products={products} movements={movements.filter(m => m.status === 'aprobado')} onAddMovement={handleAddMovement} user={currentUser} />}
+          {currentView === 'consult-inventory' && <InventoryManagement products={products} onEdit={(p) => {}} onDelete={() => {}} onAdd={() => {}} user={currentUser} />}
+          {currentView === 'report-incident' && <IncidentManagement products={products} incidents={incidents} onAddIncident={handleAddIncident} onResolveIncident={handleResolveIncident} user={currentUser} />}
+          
+          {/* Auditor */}
+          {currentView === 'audit-inventory' && <InventoryManagement products={products} onEdit={(p) => {}} onDelete={() => {}} onAdd={() => {}} user={currentUser} />}
+          {currentView === 'audit-movements' && <StockMovements products={products} movements={movements.filter(m => m.status === 'aprobado')} onAddMovement={handleAddMovement} user={currentUser} />}
+          {currentView === 'audit-reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+          {currentView === 'export-audit' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
         </main>
       </div>
 
-      {/* Product Form Modal */}
-      <ProductForm
-        isOpen={isProductFormOpen}
-        onClose={closeProductForm}
-        onSave={editingProduct ? handleEditProduct : handleAddProduct}
-        editProduct={editingProduct}
-      />
+      <ProductForm isOpen={isProductFormOpen} onClose={() => { setIsProductFormOpen(false); setEditingProduct(null); }} onSave={editingProduct ? handleEditProduct : handleAddProduct} editProduct={editingProduct} />
     </div>
   );
 }

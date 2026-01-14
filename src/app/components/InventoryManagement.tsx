@@ -12,7 +12,7 @@ interface Product {
 }
 
 interface User {
-  role: 'admin' | 'manager' | 'operator';
+  role: 'admin' | 'manager' | 'operator' | 'auditor';
 }
 
 interface InventoryManagementProps {

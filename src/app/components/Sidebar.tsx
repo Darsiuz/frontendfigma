@@ -6,12 +6,16 @@ import {
   FileText, 
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Settings,
+  AlertTriangle,
+  CheckCircle,
+  Edit
 } from 'lucide-react';
 
 interface User {
   email: string;
-  role: 'admin' | 'manager' | 'operator';
+  role: 'admin' | 'manager' | 'operator' | 'auditor';
   name: string;
 }
 
@@ -28,40 +32,118 @@ interface MenuItem {
   id: string;
   label: string;
   icon: any;
-  roles: ('admin' | 'manager' | 'operator')[];
+  roles: ('admin' | 'manager' | 'operator' | 'auditor')[];
+  badge?: number;
 }
 
 export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, onToggleCollapse }: SidebarProps) {
   const menuItems: MenuItem[] = [
+    // Dashboard - Todos
     {
       id: 'dashboard',
       label: 'Dashboard',
       icon: LayoutDashboard,
-      roles: ['admin', 'manager', 'operator']
+      roles: ['admin', 'manager', 'operator', 'auditor']
     },
+    // Admin - 5 funcionalidades
     {
       id: 'inventory',
-      label: 'Gestión de Inventario',
+      label: 'Gestionar Inventario',
       icon: Package,
-      roles: ['admin', 'manager', 'operator']
-    },
-    {
-      id: 'movements',
-      label: 'Movimientos de Stock',
-      icon: TrendingUp,
-      roles: ['admin', 'manager', 'operator']
+      roles: ['admin']
     },
     {
       id: 'users',
-      label: 'Gestión de Usuarios',
+      label: 'Gestionar Usuarios',
       icon: Users,
       roles: ['admin']
     },
     {
+      id: 'settings',
+      label: 'Configuración Sistema',
+      icon: Settings,
+      roles: ['admin']
+    },
+    {
       id: 'reports',
-      label: 'Reportes',
+      label: 'Reportes Generales',
       icon: FileText,
-      roles: ['admin', 'manager']
+      roles: ['admin']
+    },
+    // Manager - 4 funcionalidades
+    {
+      id: 'supervise',
+      label: 'Supervisar Inventario',
+      icon: Package,
+      roles: ['manager']
+    },
+    {
+      id: 'approve',
+      label: 'Aprobar Movimientos',
+      icon: CheckCircle,
+      roles: ['manager']
+    },
+    {
+      id: 'incidents',
+      label: 'Ajustar por Incidencias',
+      icon: AlertTriangle,
+      roles: ['manager']
+    },
+    {
+      id: 'manager-reports',
+      label: 'Reportes de Inventario',
+      icon: FileText,
+      roles: ['manager']
+    },
+    // Operador - 4 funcionalidades
+    {
+      id: 'register-entry',
+      label: 'Registrar Entradas',
+      icon: TrendingUp,
+      roles: ['operator']
+    },
+    {
+      id: 'register-exit',
+      label: 'Registrar Salidas',
+      icon: TrendingUp,
+      roles: ['operator']
+    },
+    {
+      id: 'consult-inventory',
+      label: 'Consultar Inventario',
+      icon: Package,
+      roles: ['operator']
+    },
+    {
+      id: 'report-incident',
+      label: 'Registrar Incidencias',
+      icon: AlertTriangle,
+      roles: ['operator']
+    },
+    // Auditor - 4 funcionalidades
+    {
+      id: 'audit-inventory',
+      label: 'Consultar Inventario',
+      icon: Package,
+      roles: ['auditor']
+    },
+    {
+      id: 'audit-movements',
+      label: 'Historial de Movimientos',
+      icon: TrendingUp,
+      roles: ['auditor']
+    },
+    {
+      id: 'audit-reports',
+      label: 'Generar Reportes',
+      icon: FileText,
+      roles: ['auditor']
+    },
+    {
+      id: 'export-audit',
+      label: 'Exportar para Auditoría',
+      icon: FileText,
+      roles: ['auditor']
     }
   ];
 
@@ -70,8 +152,9 @@ export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, 
   const getRoleLabel = (role: string) => {
     const roles: { [key: string]: string } = {
       admin: 'Administrador',
-      manager: 'Gerente',
-      operator: 'Operador'
+      manager: 'Manager',
+      operator: 'Operador',
+      auditor: 'Auditor'
     };
     return roles[role] || role;
   };
@@ -80,7 +163,8 @@ export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, 
     const colors: { [key: string]: string } = {
       admin: 'bg-purple-100 text-purple-800',
       manager: 'bg-blue-100 text-blue-800',
-      operator: 'bg-green-100 text-green-800'
+      operator: 'bg-green-100 text-green-800',
+      auditor: 'bg-orange-100 text-orange-800'
     };
     return colors[role] || 'bg-gray-100 text-gray-800';
   };
@@ -145,7 +229,7 @@ export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, 
       </div>
 
       {/* Menu items */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {visibleMenuItems.map(item => {
           const Icon = item.icon;
           const isActive = currentView === item.id;
@@ -163,6 +247,11 @@ export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, 
               <Icon className="w-5 h-5 flex-shrink-0" />
               {!isCollapsed && (
                 <span className="font-medium text-sm">{item.label}</span>
+              )}
+              {!isCollapsed && item.badge && (
+                <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                  {item.badge}
+                </span>
               )}
             </button>
           );
