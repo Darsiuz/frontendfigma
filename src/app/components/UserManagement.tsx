@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Users, Plus, Edit, Trash2, X, Shield, Mail, User as UserIcon } from 'lucide-react';
-
+import { UserRole } from '@/app/types/User';
 interface AppUser {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'manager' | 'operator' | 'auditor';
+  role: UserRole;
   status: 'active' | 'inactive';
   createdAt: string;
 }
