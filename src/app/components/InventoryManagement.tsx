@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search, Plus, Edit, Trash2, Package, Filter } from 'lucide-react';
+import { User } from '@/app/types/User';
 
 interface Product {
   id: string;
@@ -11,9 +12,9 @@ interface Product {
   location: string;
 }
 
-interface User {
-  role: 'admin' | 'manager' | 'operator' | 'auditor';
-}
+// interface User {
+//   role: 'admin' | 'manager' | 'operator' | 'auditor';
+// }
 
 interface InventoryManagementProps {
   products: Product[];

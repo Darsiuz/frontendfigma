@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, ArrowUpCircle, ArrowDownCircle, X, Calendar, Filter, Download, Activity } from 'lucide-react';
+import { User } from '@/app/types/User';
 
 interface Product {
   id: string;
@@ -22,10 +23,10 @@ interface Movement {
   user: string;
 }
 
-interface User {
-  role: 'admin' | 'manager' | 'operator' | 'auditor';
-  name: string;
-}
+// interface User {
+//   role: 'admin' | 'manager' | 'operator' | 'auditor';
+//   name: string;
+// }
 
 interface StockMovementsProps {
   products: Product[];

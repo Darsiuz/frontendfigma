@@ -267,6 +267,22 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
             ))}
           </ul>
         </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Shield className="w-5 h-5 text-gray-600" />
+            <h3 className="font-semibold text-gray-900">Auditor</h3>
+          </div>
+          <ul className="space-y-2">
+            {getRolePermissions('auditor').map((perm, index) => (
+              <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-gray-600 rounded-full" />
+                {perm}
+              </li>
+            ))}
+          </ul>
+        </div>
+        
       </div>
 
       {/* Modal de formulario */}

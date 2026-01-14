@@ -10,6 +10,7 @@ import { ProductForm } from '@/app/components/ProductForm';
 import { SystemSettings } from '@/app/components/SystemSettings';
 import { IncidentManagement } from '@/app/components/IncidentManagement';
 import { ApproveMovements } from '@/app/components/ApproveMovements';
+import { View } from '@/app/types/View';
 
 interface Product {
   id: string;
@@ -75,10 +76,10 @@ interface SystemConfig {
   maxStockPerProduct: number;
 }
 
-type View = 'dashboard' | 'inventory' | 'users' | 'settings' | 'reports' | 
-            'supervise' | 'approve' | 'incidents' | 'manager-reports' |
-            'register-entry' | 'register-exit' | 'consult-inventory' | 'report-incident' |
-            'audit-inventory' | 'audit-movements' | 'audit-reports' | 'export-audit';
+// type View = 'dashboard' | 'inventory' | 'users' | 'settings' | 'reports' | 
+//             'supervise' | 'approve' | 'incidents' | 'manager-reports' |
+//             'register-entry' | 'register-exit' | 'consult-inventory' | 'report-incident' |
+//             'audit-inventory' | 'audit-movements' | 'audit-reports' | 'export-audit';
 
 // Usuarios del sistema
 const systemUsers = [
@@ -263,7 +264,7 @@ function App() {
   };
 
   // Gestión de incidencias
-  const handleAddIncident = (incidentData: Omit<Incident, 'id' | 'reportedAt' | 'reportedBy' | 'status'>) => {
+  const handleAddIncident = (incidentData: Omit<Incident, 'id' | 'reportedAt' | 'reportedBy' | 'status' | 'productName'>) => {
     const product = products.find(p => p.id === incidentData.productId);
     if (!product || !currentUser) return;
 

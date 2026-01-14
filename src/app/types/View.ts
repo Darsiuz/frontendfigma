@@ -1,0 +1,18 @@
+export type View =
+  | 'dashboard'
+  | 'inventory'
+  | 'users'
+  | 'settings'
+  | 'reports'
+  | 'supervise'
+  | 'approve'
+  | 'incidents'
+  | 'manager-reports'
+  | 'register-entry'
+  | 'register-exit'
+  | 'consult-inventory'
+  | 'report-incident'
+  | 'audit-inventory'
+  | 'audit-movements'
+  | 'audit-reports'
+  | 'export-audit';

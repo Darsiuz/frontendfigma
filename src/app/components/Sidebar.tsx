@@ -12,16 +12,17 @@ import {
   CheckCircle,
   Edit
 } from 'lucide-react';
-
-interface User {
-  email: string;
-  role: 'admin' | 'manager' | 'operator' | 'auditor';
-  name: string;
-}
+import { View } from '@/app/types/View';
+import { User } from '@/app/types/User';
+// interface User {
+//   email: string;
+//   role: 'admin' | 'manager' | 'operator' | 'auditor';
+//   name: string;
+// }
 
 interface SidebarProps {
-  currentView: string;
-  onNavigate: (view: string) => void;
+  currentView: View;
+  onNavigate: (view: View) => void;
   user: User;
   onLogout: () => void;
   isCollapsed: boolean;
@@ -29,7 +30,7 @@ interface SidebarProps {
 }
 
 interface MenuItem {
-  id: string;
+  id: View;
   label: string;
   icon: any;
   roles: ('admin' | 'manager' | 'operator' | 'auditor')[];
