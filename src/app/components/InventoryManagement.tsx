@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, Plus, Edit, Trash2, Package, Filter } from 'lucide-react';
 import { User } from '@/app/types/User';
+// interface User 
 
 interface Product {
   id: string;
@@ -13,7 +14,7 @@ interface Product {
 }
 
 // interface User {
-//   role: 'admin' | 'manager' | 'operator' | 'auditor';
+//   role: 'admin' | 'manager' | 'operator';
 // }
 
 interface InventoryManagementProps {

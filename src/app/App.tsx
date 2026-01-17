@@ -10,7 +10,8 @@ import { ProductForm } from '@/app/components/ProductForm';
 import { SystemSettings } from '@/app/components/SystemSettings';
 import { IncidentManagement } from '@/app/components/IncidentManagement';
 import { ApproveMovements } from '@/app/components/ApproveMovements';
-import { View } from '@/app/types/View';
+import { User } from '@/app/types/User';
+import * as DB from '@/services/database';
 
 interface Product {
   id: string;
@@ -50,11 +51,11 @@ interface Incident {
   resolvedAt?: string;
 }
 
-interface User {
-  email: string;
-  role: 'admin' | 'manager' | 'operator' | 'auditor';
-  name: string;
-}
+// interface User {
+//   email: string;
+//   role: 'admin' | 'manager' | 'operator' | 'auditor';
+//   name: string;
+// }
 
 interface AppUser {
   id: string;
@@ -76,49 +77,10 @@ interface SystemConfig {
   maxStockPerProduct: number;
 }
 
-// type View = 'dashboard' | 'inventory' | 'users' | 'settings' | 'reports' | 
-//             'supervise' | 'approve' | 'incidents' | 'manager-reports' |
-//             'register-entry' | 'register-exit' | 'consult-inventory' | 'report-incident' |
-//             'audit-inventory' | 'audit-movements' | 'audit-reports' | 'export-audit';
-
-// Usuarios del sistema
-const systemUsers = [
-  { email: 'admin@warehouse.com', password: 'admin123', role: 'admin' as const, name: 'Admin Principal' },
-  { email: 'manager@warehouse.com', password: 'manager123', role: 'manager' as const, name: 'Manager López' },
-  { email: 'operator@warehouse.com', password: 'operator123', role: 'operator' as const, name: 'Operador García' },
-  { email: 'auditor@warehouse.com', password: 'auditor123', role: 'auditor' as const, name: 'Auditor Martínez' },
-];
-
-// Datos iniciales
-const initialProducts: Product[] = [
-  { id: '1', name: 'Laptop HP Pavilion 15', category: 'Electrónica', quantity: 15, minStock: 5, price: 899.99, location: 'Pasillo A, Estante 1' },
-  { id: '2', name: 'Mouse Logitech MX Master', category: 'Accesorios', quantity: 45, minStock: 20, price: 79.99, location: 'Pasillo B, Estante 3' },
-  { id: '3', name: 'Teclado Mecánico RGB', category: 'Accesorios', quantity: 3, minStock: 10, price: 149.99, location: 'Pasillo B, Estante 2' },
-  { id: '4', name: 'Monitor Dell 27"', category: 'Electrónica', quantity: 8, minStock: 5, price: 329.99, location: 'Pasillo A, Estante 2' },
-  { id: '5', name: 'Silla Ergonómica', category: 'Mobiliario', quantity: 12, minStock: 5, price: 299.99, location: 'Bodega Principal' },
-  { id: '6', name: 'Impresora Multifuncional', category: 'Electrónica', quantity: 6, minStock: 3, price: 249.99, location: 'Pasillo C, Estante 1' },
-  { id: '7', name: 'Webcam HD 1080p', category: 'Accesorios', quantity: 25, minStock: 10, price: 59.99, location: 'Pasillo B, Estante 1' },
-  { id: '8', name: 'Escritorio Ajustable', category: 'Mobiliario', quantity: 4, minStock: 5, price: 449.99, location: 'Bodega Principal' }
-];
-
-const initialAppUsers: AppUser[] = [
-  { id: '1', name: 'Admin Principal', email: 'admin@warehouse.com', role: 'admin', status: 'active', createdAt: new Date(2025, 0, 1).toISOString() },
-  { id: '2', name: 'Manager López', email: 'manager@warehouse.com', role: 'manager', status: 'active', createdAt: new Date(2025, 1, 15).toISOString() },
-  { id: '3', name: 'Operador García', email: 'operator@warehouse.com', role: 'operator', status: 'active', createdAt: new Date(2025, 2, 10).toISOString() },
-  { id: '4', name: 'Auditor Martínez', email: 'auditor@warehouse.com', role: 'auditor', status: 'active', createdAt: new Date(2025, 3, 5).toISOString() },
-  { id: '5', name: 'María González', email: 'maria.gonzalez@warehouse.com', role: 'operator', status: 'active', createdAt: new Date(2025, 5, 20).toISOString() }
-];
-
-const defaultConfig: SystemConfig = {
-  companyName: 'Almacén Central',
-  lowStockThreshold: 20,
-  currency: 'USD',
-  autoApproveMovements: false,
-  requireIncidentApproval: true,
-  enableNotifications: true,
-  defaultLocation: 'Almacén Principal',
-  maxStockPerProduct: 1000
-};
+type View = 'dashboard' | 'inventory' | 'users' | 'settings' | 'reports' | 
+            'supervise' | 'approve' | 'incidents' | 'manager-reports' |
+            'register-entry' | 'register-exit' | 'consult-inventory' | 'report-incident' |
+            'audit-inventory' | 'audit-movements' | 'audit-reports' | 'export-audit';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -130,47 +92,40 @@ function App() {
   const [movements, setMovements] = useState<Movement[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [appUsers, setAppUsers] = useState<AppUser[]>([]);
-  const [systemConfig, setSystemConfig] = useState<SystemConfig>(defaultConfig);
+  const [systemConfig, setSystemConfig] = useState<SystemConfig>(DB.DEFAULT_CONFIG);
   
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  // Cargar datos
+  // Cargar datos desde el servicio de base de datos
   useEffect(() => {
-    const savedProducts = localStorage.getItem('warehouse_products');
-    const savedMovements = localStorage.getItem('warehouse_movements');
-    const savedIncidents = localStorage.getItem('warehouse_incidents');
-    const savedAppUsers = localStorage.getItem('warehouse_app_users');
-    const savedConfig = localStorage.getItem('warehouse_config');
-    const savedUser = localStorage.getItem('warehouse_current_user');
+    setProducts(DB.loadProducts());
+    setMovements(DB.loadMovements());
+    setIncidents(DB.loadIncidents());
+    setAppUsers(DB.loadAppUsers());
+    setSystemConfig(DB.loadSystemConfig());
 
-    setProducts(savedProducts ? JSON.parse(savedProducts) : initialProducts);
-    setMovements(savedMovements ? JSON.parse(savedMovements) : []);
-    setIncidents(savedIncidents ? JSON.parse(savedIncidents) : []);
-    setAppUsers(savedAppUsers ? JSON.parse(savedAppUsers) : initialAppUsers);
-    setSystemConfig(savedConfig ? JSON.parse(savedConfig) : defaultConfig);
-
+    const savedUser = DB.loadCurrentUser();
     if (savedUser) {
-      const user = JSON.parse(savedUser);
-      setCurrentUser(user);
+      setCurrentUser(savedUser as User);
       setIsLoggedIn(true);
     }
   }, []);
 
-  // Guardar datos
-  useEffect(() => { if (products.length > 0) localStorage.setItem('warehouse_products', JSON.stringify(products)); }, [products]);
-  useEffect(() => { if (movements.length > 0) localStorage.setItem('warehouse_movements', JSON.stringify(movements)); }, [movements]);
-  useEffect(() => { if (incidents.length > 0) localStorage.setItem('warehouse_incidents', JSON.stringify(incidents)); }, [incidents]);
-  useEffect(() => { if (appUsers.length > 0) localStorage.setItem('warehouse_app_users', JSON.stringify(appUsers)); }, [appUsers]);
-  useEffect(() => { localStorage.setItem('warehouse_config', JSON.stringify(systemConfig)); }, [systemConfig]);
+  // Guardar datos automáticamente
+  useEffect(() => { if (products.length > 0) DB.saveProducts(products); }, [products]);
+  useEffect(() => { if (movements.length > 0) DB.saveMovements(movements); }, [movements]);
+  useEffect(() => { if (incidents.length > 0) DB.saveIncidents(incidents); }, [incidents]);
+  useEffect(() => { if (appUsers.length > 0) DB.saveAppUsers(appUsers); }, [appUsers]);
+  useEffect(() => { DB.saveSystemConfig(systemConfig); }, [systemConfig]);
 
   const handleLogin = (email: string, password: string) => {
-    const user = systemUsers.find(u => u.email === email && u.password === password);
+    const user = DB.authenticateUser(email, password);
     if (user) {
       const loggedUser = { email: user.email, role: user.role, name: user.name };
       setCurrentUser(loggedUser);
       setIsLoggedIn(true);
-      localStorage.setItem('warehouse_current_user', JSON.stringify(loggedUser));
+      DB.saveCurrentUser(loggedUser);
     } else {
       alert('Credenciales incorrectas');
     }
@@ -180,7 +135,7 @@ function App() {
     setCurrentUser(null);
     setIsLoggedIn(false);
     setCurrentView('dashboard');
-    localStorage.removeItem('warehouse_current_user');
+    DB.clearCurrentUser();
   };
 
   // Gestión de productos
@@ -264,7 +219,7 @@ function App() {
   };
 
   // Gestión de incidencias
-  const handleAddIncident = (incidentData: Omit<Incident, 'id' | 'reportedAt' | 'reportedBy' | 'status' | 'productName'>) => {
+  const handleAddIncident = (incidentData: Omit<Incident, 'id' | 'reportedAt' | 'reportedBy' | 'status'>) => {
     const product = products.find(p => p.id === incidentData.productId);
     if (!product || !currentUser) return;
 
@@ -385,8 +340,8 @@ function App() {
           {currentView === 'manager-reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
           
           {/* Operator */}
-          {currentView === 'register-entry' && <StockMovements products={products} movements={movements.filter(m => m.status === 'aprobado')} onAddMovement={handleAddMovement} user={currentUser} />}
-          {currentView === 'register-exit' && <StockMovements products={products} movements={movements.filter(m => m.status === 'aprobado')} onAddMovement={handleAddMovement} user={currentUser} />}
+          {currentView === 'register-entry' && <StockMovements products={products} movements={movements} onAddMovement={handleAddMovement} user={currentUser} />}
+          {currentView === 'register-exit' && <StockMovements products={products} movements={movements} onAddMovement={handleAddMovement} user={currentUser} />}
           {currentView === 'consult-inventory' && <InventoryManagement products={products} onEdit={(p) => {}} onDelete={() => {}} onAdd={() => {}} user={currentUser} />}
           {currentView === 'report-incident' && <IncidentManagement products={products} incidents={incidents} onAddIncident={handleAddIncident} onResolveIncident={handleResolveIncident} user={currentUser} />}
           

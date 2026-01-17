@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Plus, ArrowUpCircle, ArrowDownCircle, X, Calendar, Filter, Download, Activity } from 'lucide-react';
-import { User } from '@/app/types/User';
 
 interface Product {
   id: string;
@@ -21,12 +20,15 @@ interface Movement {
   date: string;
   reason: string;
   user: string;
+  status?: 'pendiente' | 'aprobado' | 'rechazado';
+  reviewedBy?: string;
+  reviewedAt?: string;
 }
 
-// interface User {
-//   role: 'admin' | 'manager' | 'operator' | 'auditor';
-//   name: string;
-// }
+interface User {
+  role: 'admin' | 'manager' | 'operator' | 'auditor';
+  name: string;
+}
 
 interface StockMovementsProps {
   products: Product[];
@@ -47,7 +49,8 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
   const [dateFilter, setDateFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const canEdit = user.role === 'admin' || user.role === 'manager';
+  // Admin, Manager y Operator pueden registrar movimientos
+  const canEdit = user.role === 'admin' || user.role === 'manager' || user.role === 'operator';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -241,6 +244,18 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
                         }`}>
                           {movement.type === 'entrada' ? 'Entrada' : 'Salida'}
                         </span>
+                        {movement.status && (
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                            movement.status === 'pendiente'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : movement.status === 'aprobado'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {movement.status === 'pendiente' ? 'Pendiente' : 
+                             movement.status === 'aprobado' ? 'Aprobado' : 'Rechazado'}
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm text-gray-600 mb-2">{movement.reason}</p>
                       <div className="flex items-center gap-4 text-xs text-gray-500">
@@ -256,6 +271,11 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
                         </span>
                         <span>Por: {movement.user}</span>
                       </div>
+                      {movement.reviewedBy && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          Revisado por: {movement.reviewedBy} el {new Date(movement.reviewedAt!).toLocaleDateString('es-ES')}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">
