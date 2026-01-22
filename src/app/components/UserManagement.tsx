@@ -1,28 +1,67 @@
-import { useState } from 'react';
+import { useEffect, useState } from "react";
+import { getUsers, createUser, updateUser, deleteUser, disableUser } from "@/services/user.service";
 import { Users, Plus, Edit, Trash2, X, Shield, Mail, User as UserIcon } from 'lucide-react';
-
+import type { UserRole, ApiUser } from '@/app/types/User';
 interface AppUser {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'manager' | 'operator' | 'auditor';
+  role: UserRole;
   status: 'active' | 'inactive';
   createdAt: string;
 }
 
-interface UserManagementProps {
-  users: AppUser[];
-  onAddUser: (user: Omit<AppUser, 'id' | 'createdAt'>) => void;
-  onEditUser: (id: string, user: Omit<AppUser, 'id' | 'createdAt'>) => void;
-  onDeleteUser: (id: string) => void;
-}
+// interface UserManagementProps {
+//   users: AppUser[];
+//   onAddUser: (user: Omit<AppUser, 'id' | 'createdAt'>) => void;
+//   onEditUser: (id: string, user: Omit<AppUser, 'id' | 'createdAt'>) => void;
+//   onDeleteUser: (id: string) => void;
+// }
 
-export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: UserManagementProps) {
+export function UserManagement() {
+  const [users, setUsers] = useState<AppUser[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const mapApiUserToAppUser = (apiUser: ApiUser): AppUser => ({
+    id: apiUser.id.toString(),
+    name: apiUser.name,
+    email: apiUser.email,
+    role: apiUser.role.name.toLowerCase() as AppUser["role"],
+    status: (apiUser.active ? "active" : "inactive") as AppUser["status"],
+    createdAt: apiUser.createdAt,
+  });
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const data = await getUsers();
+
+        // const mapped = data.map((u: ApiUser) => ({
+        //   id: u.id.toString(),
+        //   name: u.name,
+        //   email: u.email,
+        //   role: u.role.name.toLowerCase() as AppUser["role"],
+        //   status: (u.active ? "active" : "inactive") as AppUser["status"],
+        //   createdAt: u.createdAt,
+        // }));
+
+        setUsers(data.map(mapApiUserToAppUser));
+      } catch (e) {
+        console.error("Error cargando usuarios", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUsers();
+  }, []);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AppUser | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
     role: 'operator' as 'admin' | 'manager' | 'operator' | 'auditor',
     status: 'active' as 'active' | 'inactive',
   });
@@ -31,6 +70,7 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
     setFormData({
       name: '',
       email: '',
+      password: '',
       role: 'operator',
       status: 'active',
     });
@@ -42,21 +82,56 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
     setFormData({
       name: user.name,
       email: user.email,
+      password: '',
       role: user.role,
       status: user.status,
     });
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingUser) {
-      onEditUser(editingUser.id, formData);
-    } else {
-      onAddUser(formData);
+  const handleDeleteUser = async (id: string) => {
+    try {
+      await deleteUser(Number(id));
+      setUsers(users.filter(u => u.id !== id));
+    } catch (e) {
+      console.error("Error eliminando usuario", e);
+      alert("Error al eliminar usuario");
     }
-    setIsModalOpen(false);
-    resetForm();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (editingUser) {
+        await updateUser(Number(editingUser.id), {
+          name: formData.name,
+          email: formData.email,
+          role: formData.role.toUpperCase(),
+          active: formData.status === 'active',
+          ...(formData.password && { password: formData.password })
+        });
+      } else {
+        await createUser({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role.toUpperCase(),
+          active: formData.status === 'active',
+        });
+      }
+
+      setIsModalOpen(false);
+      resetForm();
+
+      // recargar lista
+      const refreshed = await getUsers();
+      setUsers(refreshed.map(mapApiUserToAppUser));
+
+    } catch (e) {
+      console.error("Error guardando usuario", e);
+      alert("Error al guardar usuario");
+    }
   };
 
   const getRoleLabel = (role: string) => {
@@ -110,8 +185,9 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
       </div>
 
       {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-4">
+
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+        <div className="bg-white rounded-lg shadow p-4 md:col-span-2">
           <p className="text-sm text-gray-600">Total Usuarios</p>
           <p className="text-2xl font-bold text-gray-900 mt-1">{users.length}</p>
         </div>
@@ -131,6 +207,12 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
           <p className="text-sm text-gray-600">Operadores</p>
           <p className="text-2xl font-bold text-green-600 mt-1">
             {users.filter(u => u.role === 'operator').length}
+          </p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="text-sm text-gray-600">Auditor</p>
+          <p className="text-2xl font-bold text-gray-600 mt-1">
+            {users.filter(u => u.role === 'auditor').length}
           </p>
         </div>
       </div>
@@ -183,11 +265,10 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      user.status === 'active' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${user.status === 'active'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
+                      }`}>
                       {user.status === 'active' ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
@@ -205,7 +286,7 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
                     <button
                       onClick={() => {
                         if (confirm(`¿Está seguro de eliminar al usuario "${user.name}"?`)) {
-                          onDeleteUser(user.id);
+                          handleDeleteUser(user.id);
                         }
                       }}
                       className="text-red-600 hover:text-red-900"
@@ -222,7 +303,7 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
       </div>
 
       {/* Información de permisos por rol */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
             <Shield className="w-5 h-5 text-purple-600" />
@@ -267,7 +348,25 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
             ))}
           </ul>
         </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Shield className="w-5 h-5 text-gray-600" />
+            <h3 className="font-semibold text-gray-900">Auditor</h3>
+          </div>
+          <ul className="space-y-2">
+            {getRolePermissions('auditor').map((perm, index) => (
+              <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-gray-600 rounded-full" />
+                {perm}
+              </li>
+            ))}
+          </ul>
+        </div>
+
       </div>
+
+      <div className="h-12" />
 
       {/* Modal de formulario */}
       {isModalOpen && (
@@ -319,6 +418,23 @@ export function UserManagement({ users, onAddUser, onEditUser, onDeleteUser }: U
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="usuario@ejemplo.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Contraseña *
+                </label>
+                <div className="relative">
+                  <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="password"
+                    required={!editingUser}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={editingUser ? "Dejar en blanco para no cambiar" : "Contraseña"}
                   />
                 </div>
               </div>

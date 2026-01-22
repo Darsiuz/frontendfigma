@@ -5,3 +5,15 @@ export interface User {
   name: string;
   role: UserRole;
 }
+
+export interface ApiUser {
+  id: number;
+  name: string;
+  email: string;
+  role: {
+    id: number;
+    name: string;
+  };
+  active: boolean;
+  createdAt: string;
+}

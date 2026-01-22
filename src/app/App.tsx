@@ -12,6 +12,9 @@ import { IncidentManagement } from '@/app/components/IncidentManagement';
 import { ApproveMovements } from '@/app/components/ApproveMovements';
 import { User } from '@/app/types/User';
 import * as DB from '@/services/database';
+import { login } from '@/services/auth.service';
+
+import type { View } from '@/app/types/View';
 
 interface Product {
   id: string;
@@ -57,14 +60,14 @@ interface Incident {
 //   name: string;
 // }
 
-interface AppUser {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'manager' | 'operator' | 'auditor';
-  status: 'active' | 'inactive';
-  createdAt: string;
-}
+// interface AppUser {
+//   id: string;
+//   name: string;
+//   email: string;
+//   role: 'admin' | 'manager' | 'operator' | 'auditor';
+//   status: 'active' | 'inactive';
+//   createdAt: string;
+// }
 
 interface SystemConfig {
   companyName: string;
@@ -77,10 +80,10 @@ interface SystemConfig {
   maxStockPerProduct: number;
 }
 
-type View = 'dashboard' | 'inventory' | 'users' | 'settings' | 'reports' | 
-            'supervise' | 'approve' | 'incidents' | 'manager-reports' |
-            'register-entry' | 'register-exit' | 'consult-inventory' | 'report-incident' |
-            'audit-inventory' | 'audit-movements' | 'audit-reports' | 'export-audit';
+// type View = 'dashboard' | 'inventory' | 'users' | 'settings' | 'reports' |
+//   'supervise' | 'approve' | 'incidents' | 'manager-reports' |
+//   'register-entry' | 'register-exit' | 'consult-inventory' | 'report-incident' |
+//   'audit-inventory' | 'audit-movements' | 'audit-reports' | 'export-audit';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -91,9 +94,9 @@ function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [movements, setMovements] = useState<Movement[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [appUsers, setAppUsers] = useState<AppUser[]>([]);
+  // const [appUsers, setAppUsers] = useState<AppUser[]>([]);
   const [systemConfig, setSystemConfig] = useState<SystemConfig>(DB.DEFAULT_CONFIG);
-  
+
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
@@ -102,12 +105,12 @@ function App() {
     setProducts(DB.loadProducts());
     setMovements(DB.loadMovements());
     setIncidents(DB.loadIncidents());
-    setAppUsers(DB.loadAppUsers());
+    // setAppUsers(DB.loadAppUsers());
     setSystemConfig(DB.loadSystemConfig());
 
-    const savedUser = DB.loadCurrentUser();
-    if (savedUser) {
-      setCurrentUser(savedUser as User);
+    const saved = localStorage.getItem('currentUser');
+    if (saved) {
+      setCurrentUser(JSON.parse(saved));
       setIsLoggedIn(true);
     }
   }, []);
@@ -116,18 +119,26 @@ function App() {
   useEffect(() => { if (products.length > 0) DB.saveProducts(products); }, [products]);
   useEffect(() => { if (movements.length > 0) DB.saveMovements(movements); }, [movements]);
   useEffect(() => { if (incidents.length > 0) DB.saveIncidents(incidents); }, [incidents]);
-  useEffect(() => { if (appUsers.length > 0) DB.saveAppUsers(appUsers); }, [appUsers]);
+  // useEffect(() => { if (appUsers.length > 0) DB.saveAppUsers(appUsers); }, [appUsers]);
   useEffect(() => { DB.saveSystemConfig(systemConfig); }, [systemConfig]);
 
-  const handleLogin = (email: string, password: string) => {
-    const user = DB.authenticateUser(email, password);
-    if (user) {
-      const loggedUser = { email: user.email, role: user.role, name: user.name };
-      setCurrentUser(loggedUser);
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      const response = await login({ email, password });
+
+      localStorage.setItem("auth", `${email}:${password}`);
+
+      const mappedUser: User = {
+        email: response.email,
+        name: response.name,
+        role: response.role.toLowerCase() as User['role'],
+      };
+
+      setCurrentUser(mappedUser);
       setIsLoggedIn(true);
-      DB.saveCurrentUser(loggedUser);
-    } else {
-      alert('Credenciales incorrectas');
+
+    } catch (error) {
+      alert("Credenciales incorrectas");
     }
   };
 
@@ -135,7 +146,7 @@ function App() {
     setCurrentUser(null);
     setIsLoggedIn(false);
     setCurrentView('dashboard');
-    DB.clearCurrentUser();
+    localStorage.removeItem('currentUser');
   };
 
   // Gestión de productos
@@ -202,8 +213,8 @@ function App() {
     });
 
     setProducts(updatedProducts);
-    setMovements(movements.map(m => 
-      m.id === id 
+    setMovements(movements.map(m =>
+      m.id === id
         ? { ...m, status: 'aprobado', reviewedBy: currentUser.name, reviewedAt: new Date().toISOString() }
         : m
     ));
@@ -211,8 +222,8 @@ function App() {
 
   const handleRejectMovement = (id: string) => {
     if (!currentUser) return;
-    setMovements(movements.map(m => 
-      m.id === id 
+    setMovements(movements.map(m =>
+      m.id === id
         ? { ...m, status: 'rechazado', reviewedBy: currentUser.name, reviewedAt: new Date().toISOString() }
         : m
     ));
@@ -250,26 +261,26 @@ function App() {
       setProducts(updatedProducts);
     }
 
-    setIncidents(incidents.map(i => 
-      i.id === id 
+    setIncidents(incidents.map(i =>
+      i.id === id
         ? { ...i, status, resolvedBy: currentUser.name, resolvedAt: new Date().toISOString() }
         : i
     ));
   };
 
   // Gestión de usuarios
-  const handleAddAppUser = (userData: Omit<AppUser, 'id' | 'createdAt'>) => {
-    const newUser: AppUser = { ...userData, id: Date.now().toString(), createdAt: new Date().toISOString() };
-    setAppUsers([...appUsers, newUser]);
-  };
+  // const handleAddAppUser = (userData: Omit<AppUser, 'id' | 'createdAt'>) => {
+  //   const newUser: AppUser = { ...userData, id: Date.now().toString(), createdAt: new Date().toISOString() };
+  //   setAppUsers([...appUsers, newUser]);
+  // };
 
-  const handleEditAppUser = (id: string, userData: Omit<AppUser, 'id' | 'createdAt'>) => {
-    setAppUsers(appUsers.map(u => u.id === id ? { ...userData, id, createdAt: u.createdAt } : u));
-  };
+  // const handleEditAppUser = (id: string, userData: Omit<AppUser, 'id' | 'createdAt'>) => {
+  //   setAppUsers(appUsers.map(u => u.id === id ? { ...userData, id, createdAt: u.createdAt } : u));
+  // };
 
-  const handleDeleteAppUser = (id: string) => {
-    setAppUsers(appUsers.filter(u => u.id !== id));
-  };
+  // const handleDeleteAppUser = (id: string) => {
+  //   setAppUsers(appUsers.filter(u => u.id !== id));
+  // };
 
   // Configuración del sistema
   const handleSaveConfig = (config: SystemConfig) => {
@@ -326,27 +337,27 @@ function App() {
 
         <main className="flex-1 overflow-y-auto p-6">
           {currentView === 'dashboard' && <DashboardView products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
-          
+
           {/* Admin */}
           {currentView === 'inventory' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}
-          {currentView === 'users' && <UserManagement users={appUsers} onAddUser={handleAddAppUser} onEditUser={handleEditAppUser} onDeleteUser={handleDeleteAppUser} />}
+          {currentView === 'users' && <UserManagement />}
           {currentView === 'settings' && <SystemSettings config={systemConfig} onSave={handleSaveConfig} />}
           {currentView === 'reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
-          
+
           {/* Manager */}
           {currentView === 'supervise' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}
           {currentView === 'approve' && <ApproveMovements movements={movements} onApprove={handleApproveMovement} onReject={handleRejectMovement} />}
           {currentView === 'incidents' && <IncidentManagement products={products} incidents={incidents} onAddIncident={handleAddIncident} onResolveIncident={handleResolveIncident} user={currentUser} />}
           {currentView === 'manager-reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
-          
+
           {/* Operator */}
           {currentView === 'register-entry' && <StockMovements products={products} movements={movements} onAddMovement={handleAddMovement} user={currentUser} />}
           {currentView === 'register-exit' && <StockMovements products={products} movements={movements} onAddMovement={handleAddMovement} user={currentUser} />}
-          {currentView === 'consult-inventory' && <InventoryManagement products={products} onEdit={(p) => {}} onDelete={() => {}} onAdd={() => {}} user={currentUser} />}
+          {currentView === 'consult-inventory' && <InventoryManagement products={products} onEdit={(p) => { }} onDelete={() => { }} onAdd={() => { }} user={currentUser} />}
           {currentView === 'report-incident' && <IncidentManagement products={products} incidents={incidents} onAddIncident={handleAddIncident} onResolveIncident={handleResolveIncident} user={currentUser} />}
-          
+
           {/* Auditor */}
-          {currentView === 'audit-inventory' && <InventoryManagement products={products} onEdit={(p) => {}} onDelete={() => {}} onAdd={() => {}} user={currentUser} />}
+          {currentView === 'audit-inventory' && <InventoryManagement products={products} onEdit={(p) => { }} onDelete={() => { }} onAdd={() => { }} user={currentUser} />}
           {currentView === 'audit-movements' && <StockMovements products={products} movements={movements.filter(m => m.status === 'aprobado')} onAddMovement={handleAddMovement} user={currentUser} />}
           {currentView === 'audit-reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
           {currentView === 'export-audit' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
