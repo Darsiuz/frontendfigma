@@ -1,11 +1,14 @@
+export type IncidentType = 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro';
+export type IncidentStatus = 'pendiente' | 'resuelto' | 'rechazado';
+
 export interface Incident {
     id: string;
     productId: number;
     productName: string;
-    type: 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro';
+    type: IncidentType;
     quantity: number;
     description: string;
-    status: 'pendiente' | 'resuelto' | 'rechazado';
+    status: IncidentStatus;
     reportedBy: string;
     reportedAt: string;
     resolvedBy?: string;

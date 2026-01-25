@@ -20,62 +20,9 @@ import * as DB from '@/services/database';
 import { login } from '@/services/auth.service';
 import * as ProductService from '@/services/product.service';
 import * as MovementService from '@/services/movement.service';
+import * as IncidentService from '@/services/incident.service';
 
 import type { View } from '@/app/types/View';
-
-// interface Product {
-//   id: string;
-//   name: string;
-//   category: string;
-//   quantity: number;
-//   minStock: number;
-//   price: number;
-//   location: string;
-// }
-
-// interface Movement {
-//   id: string;
-//   productId: number;
-//   productName: string;
-//   type: 'entrada' | 'salida';
-//   quantity: number;
-//   date: string;
-//   reason: string;
-//   user: string;
-//   status: 'pendiente' | 'aprobado' | 'rechazado';
-//   reviewedBy?: string;
-//   reviewedAt?: string;
-// }
-
-// interface Incident {
-//   id: string;
-//   productId: number;
-//   productName: string;
-//   type: 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro';
-//   quantity: number;
-//   description: string;
-//   status: 'pendiente' | 'resuelto' | 'rechazado';
-//   reportedBy: string;
-//   reportedAt: string;
-//   resolvedBy?: string;
-//   resolvedAt?: string;
-// }
-
-// interface User {
-//   email: string;
-//   role: 'admin' | 'manager' | 'operator' | 'auditor';
-//   name: string;
-// }
-
-// interface AppUser {
-//   id: string;
-//   name: string;
-//   email: string;
-//   role: 'admin' | 'manager' | 'operator' | 'auditor';
-//   status: 'active' | 'inactive';
-//   createdAt: string;
-// }
-
 interface SystemConfig {
   companyName: string;
   lowStockThreshold: number;
@@ -86,11 +33,6 @@ interface SystemConfig {
   defaultLocation: string;
   maxStockPerProduct: number;
 }
-
-// type View = 'dashboard' | 'inventory' | 'users' | 'settings' | 'reports' |
-//   'supervise' | 'approve' | 'incidents' | 'manager-reports' |
-//   'register-entry' | 'register-exit' | 'consult-inventory' | 'report-incident' |
-//   'audit-inventory' | 'audit-movements' | 'audit-reports' | 'export-audit';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -128,6 +70,10 @@ function App() {
     MovementService.getMovements()
       .then(setMovements)
       .catch(() => alert('Error cargando movimientos'));
+
+    IncidentService.getIncidents()
+      .then(setIncidents)
+      .catch(() => alert('Error cargando incidencias'));
   }, []);
 
   // Guardar datos automáticamente
@@ -230,42 +176,26 @@ function App() {
   };
 
   // Gestión de incidencias
-  const handleAddIncident = (incidentData: Omit<Incident, 'id' | 'reportedAt' | 'reportedBy' | 'status' | 'productName'>) => {
-    const product = products.find(p => p.id === incidentData.productId);
-    if (!product || !currentUser) return;
-
-    const newIncident: Incident = {
-      ...incidentData,
-      id: Date.now().toString(),
-      productName: product.name,
-      reportedBy: currentUser.name,
-      reportedAt: new Date().toISOString(),
-      status: 'pendiente'
-    };
-
-    setIncidents([...incidents, newIncident]);
+  const handleAddIncident = async (incidentData: Omit<Incident, 'id' | 'productName' | 'reportedAt' | 'reportedBy' | 'status'>) => {
+    try {
+      const newIncident = await IncidentService.createIncident(incidentData);
+      setIncidents([...incidents, newIncident]);
+    } catch {
+      alert('Error registrando incidencia');
+    }
   };
 
-  const handleResolveIncident = (id: string, status: 'resuelto' | 'rechazado') => {
-    const incident = incidents.find(i => i.id === id);
-    if (!incident || !currentUser) return;
+  const handleResolveIncident = async (id: string, status: 'resuelto' | 'rechazado') => {
+    try {
+      const updated =
+        status === 'resuelto'
+          ? await IncidentService.resolveIncident(id)
+          : await IncidentService.rejectIncident(id);
 
-    // Si se resuelve, ajustar el stock
-    if (status === 'resuelto') {
-      const updatedProducts = products.map(p => {
-        if (p.id === incident.productId) {
-          return { ...p, quantity: Math.max(0, p.quantity - incident.quantity) };
-        }
-        return p;
-      });
-      setProducts(updatedProducts);
+      setIncidents(incidents.map(i => (i.id === id ? updated : i)));
+    } catch {
+      alert('Error actualizando incidencia');
     }
-
-    setIncidents(incidents.map(i =>
-      i.id === id
-        ? { ...i, status, resolvedBy: currentUser.name, resolvedAt: new Date().toISOString() }
-        : i
-    ));
   };
 
   // Gestión de usuarios
