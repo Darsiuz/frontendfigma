@@ -17,3 +17,12 @@ export interface ApiUser {
   active: boolean;
   createdAt: string;
 }
+
+export interface AppUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  status: 'active' | 'inactive';
+  createdAt: string;
+}

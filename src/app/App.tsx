@@ -10,49 +10,55 @@ import { ProductForm } from '@/app/components/ProductForm';
 import { SystemSettings } from '@/app/components/SystemSettings';
 import { IncidentManagement } from '@/app/components/IncidentManagement';
 import { ApproveMovements } from '@/app/components/ApproveMovements';
+
 import { User } from '@/app/types/User';
+import { Product } from '@/app/types/Product';
+import { Movement } from '@/app/types/Movement';
+import { Incident } from '@/app/types/Incident';
+
 import * as DB from '@/services/database';
 import { login } from '@/services/auth.service';
+import * as ProductService from '@/services/product.service';
 
 import type { View } from '@/app/types/View';
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  quantity: number;
-  minStock: number;
-  price: number;
-  location: string;
-}
+// interface Product {
+//   id: string;
+//   name: string;
+//   category: string;
+//   quantity: number;
+//   minStock: number;
+//   price: number;
+//   location: string;
+// }
 
-interface Movement {
-  id: string;
-  productId: string;
-  productName: string;
-  type: 'entrada' | 'salida';
-  quantity: number;
-  date: string;
-  reason: string;
-  user: string;
-  status: 'pendiente' | 'aprobado' | 'rechazado';
-  reviewedBy?: string;
-  reviewedAt?: string;
-}
+// interface Movement {
+//   id: string;
+//   productId: number;
+//   productName: string;
+//   type: 'entrada' | 'salida';
+//   quantity: number;
+//   date: string;
+//   reason: string;
+//   user: string;
+//   status: 'pendiente' | 'aprobado' | 'rechazado';
+//   reviewedBy?: string;
+//   reviewedAt?: string;
+// }
 
-interface Incident {
-  id: string;
-  productId: string;
-  productName: string;
-  type: 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro';
-  quantity: number;
-  description: string;
-  status: 'pendiente' | 'resuelto' | 'rechazado';
-  reportedBy: string;
-  reportedAt: string;
-  resolvedBy?: string;
-  resolvedAt?: string;
-}
+// interface Incident {
+//   id: string;
+//   productId: number;
+//   productName: string;
+//   type: 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro';
+//   quantity: number;
+//   description: string;
+//   status: 'pendiente' | 'resuelto' | 'rechazado';
+//   reportedBy: string;
+//   reportedAt: string;
+//   resolvedBy?: string;
+//   resolvedAt?: string;
+// }
 
 // interface User {
 //   email: string;
@@ -102,25 +108,29 @@ function App() {
 
   // Cargar datos desde el servicio de base de datos
   useEffect(() => {
-    setProducts(DB.loadProducts());
-    setMovements(DB.loadMovements());
-    setIncidents(DB.loadIncidents());
+    // setProducts(DB.loadProducts());
+    // setMovements(DB.loadMovements());
+    // setIncidents(DB.loadIncidents());
     // setAppUsers(DB.loadAppUsers());
-    setSystemConfig(DB.loadSystemConfig());
+    // setSystemConfig(DB.loadSystemConfig());
 
     const saved = localStorage.getItem('currentUser');
     if (saved) {
       setCurrentUser(JSON.parse(saved));
       setIsLoggedIn(true);
     }
+
+    ProductService.getProducts()
+      .then(setProducts)
+      .catch(() => alert('Error cargando productos'));
   }, []);
 
   // Guardar datos automáticamente
-  useEffect(() => { if (products.length > 0) DB.saveProducts(products); }, [products]);
-  useEffect(() => { if (movements.length > 0) DB.saveMovements(movements); }, [movements]);
-  useEffect(() => { if (incidents.length > 0) DB.saveIncidents(incidents); }, [incidents]);
+  // useEffect(() => { if (products.length > 0) DB.saveProducts(products); }, [products]);
+  // useEffect(() => { if (movements.length > 0) DB.saveMovements(movements); }, [movements]);
+  // useEffect(() => { if (incidents.length > 0) DB.saveIncidents(incidents); }, [incidents]);
   // useEffect(() => { if (appUsers.length > 0) DB.saveAppUsers(appUsers); }, [appUsers]);
-  useEffect(() => { DB.saveSystemConfig(systemConfig); }, [systemConfig]);
+  // useEffect(() => { DB.saveSystemConfig(systemConfig); }, [systemConfig]);
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -150,20 +160,38 @@ function App() {
   };
 
   // Gestión de productos
-  const handleAddProduct = (productData: Omit<Product, 'id'>) => {
-    const newProduct: Product = { ...productData, id: Date.now().toString() };
-    setProducts([...products, newProduct]);
-  };
-
-  const handleEditProduct = (productData: Omit<Product, 'id'>) => {
-    if (editingProduct) {
-      setProducts(products.map(p => p.id === editingProduct.id ? { ...productData, id: editingProduct.id } : p));
-      setEditingProduct(null);
+  const handleAddProduct = async (productData: Omit<Product, 'id'>) => {
+    try {
+      const newProduct = await ProductService.createProduct(productData);
+      setProducts([...products, newProduct]);
+    } catch {
+      alert('Error creando producto');
     }
   };
 
-  const handleDeleteProduct = (id: string) => {
-    setProducts(products.filter(p => p.id !== id));
+  const handleEditProduct = async (productData: Omit<Product, 'id'>) => {
+    if (!editingProduct) return;
+
+    try {
+      const updated = await ProductService.updateProduct(
+        editingProduct.id,
+        productData
+      );
+
+      setProducts(products.map(p => (p.id === updated.id ? updated : p)));
+      setEditingProduct(null);
+    } catch {
+      alert('Error actualizando producto');
+    }
+  };
+
+  const handleDeleteProduct = async (id: number) => {
+    try {
+      await ProductService.deleteProduct(id);
+      setProducts(products.filter(p => p.id !== id));
+    } catch {
+      alert('Error eliminando producto');
+    }
   };
 
   // Gestión de movimientos
@@ -230,7 +258,7 @@ function App() {
   };
 
   // Gestión de incidencias
-  const handleAddIncident = (incidentData: Omit<Incident, 'id' | 'reportedAt' | 'reportedBy' | 'status'>) => {
+  const handleAddIncident = (incidentData: Omit<Incident, 'id' | 'reportedAt' | 'reportedBy' | 'status' | 'productName'>) => {
     const product = products.find(p => p.id === incidentData.productId);
     if (!product || !currentUser) return;
 
@@ -278,7 +306,7 @@ function App() {
   //   setAppUsers(appUsers.map(u => u.id === id ? { ...userData, id, createdAt: u.createdAt } : u));
   // };
 
-  // const handleDeleteAppUser = (id: string) => {
+  // const handleDeleteAppUser = (id: number) => {
   //   setAppUsers(appUsers.filter(u => u.id !== id));
   // };
 

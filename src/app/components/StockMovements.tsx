@@ -1,46 +1,50 @@
 import { useState } from 'react';
 import { Plus, ArrowUpCircle, ArrowDownCircle, X, Calendar, Filter, Download, Activity } from 'lucide-react';
+import { Product } from '@/app/types/Product';
+import { Movement } from '@/app/types/Movement';
+import { User } from '@/app/types/User';
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  quantity: number;
-  minStock: number;
-  price: number;
-  location: string;
-}
 
-interface Movement {
-  id: string;
-  productId: string;
-  productName: string;
-  type: 'entrada' | 'salida';
-  quantity: number;
-  date: string;
-  reason: string;
-  user: string;
-  status?: 'pendiente' | 'aprobado' | 'rechazado';
-  reviewedBy?: string;
-  reviewedAt?: string;
-}
+// interface Product {
+//   id: string;
+//   name: string;
+//   category: string;
+//   quantity: number;
+//   minStock: number;
+//   price: number;
+//   location: string;
+// }
 
-interface User {
-  role: 'admin' | 'manager' | 'operator' | 'auditor';
-  name: string;
-}
+// interface Movement {
+//   id: string;
+//   productId: string;
+//   productName: string;
+//   type: 'entrada' | 'salida';
+//   quantity: number;
+//   date: string;
+//   reason: string;
+//   user: string;
+//   status?: 'pendiente' | 'aprobado' | 'rechazado';
+//   reviewedBy?: string;
+//   reviewedAt?: string;
+// }
+
+// interface User {
+//   role: 'admin' | 'manager' | 'operator' | 'auditor';
+//   name: string;
+// }
 
 interface StockMovementsProps {
   products: Product[];
   movements: Movement[];
-  onAddMovement: (movement: Omit<Movement, 'id' | 'date' | 'productName' | 'user'>) => void;
+  onAddMovement: (movement: Omit<Movement, 'id' | 'date' | 'productName' | 'user' | 'status'>) => void;
   user: User;
 }
 
 export function StockMovements({ products, movements, onAddMovement, user }: StockMovementsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    productId: '',
+    productId: 0,
     type: 'entrada' as 'entrada' | 'salida',
     quantity: 0,
     reason: '',
@@ -57,7 +61,7 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
     if (formData.productId && formData.quantity > 0) {
       onAddMovement(formData);
       setFormData({
-        productId: '',
+        productId: 0,
         type: 'entrada',
         quantity: 0,
         reason: '',
@@ -315,10 +319,10 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
                 <select
                   required
                   value={formData.productId}
-                  onChange={(e) => setFormData({ ...formData, productId: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, productId: Number(e.target.value) })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Seleccionar producto...</option>
+                  <option value={0}>Seleccionar producto...</option>
                   {products.map(product => (
                     <option key={product.id} value={product.id}>
                       {product.name} (Stock actual: {product.quantity})

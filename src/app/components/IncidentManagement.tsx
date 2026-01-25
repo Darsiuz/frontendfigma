@@ -1,39 +1,42 @@
 import { useState } from 'react';
 import { AlertTriangle, Plus, X, Clock, CheckCircle, XCircle } from 'lucide-react';
+import type { User } from '@/app/types/User';
+import type { Product } from '@/app/types/Product';
+import type { Incident } from '@/app/types/Incident';
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  quantity: number;
-  minStock: number;
-  price: number;
-  location: string;
-}
+// interface Product {
+//   id: string;
+//   name: string;
+//   category: string;
+//   quantity: number;
+//   minStock: number;
+//   price: number;
+//   location: string;
+// }
 
-interface Incident {
-  id: string;
-  productId: string;
-  productName: string;
-  type: 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro';
-  quantity: number;
-  description: string;
-  status: 'pendiente' | 'resuelto' | 'rechazado';
-  reportedBy: string;
-  reportedAt: string;
-  resolvedBy?: string;
-  resolvedAt?: string;
-}
+// interface Incident {
+//   id: string;
+//   productId: string;
+//   productName: string;
+//   type: 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro';
+//   quantity: number;
+//   description: string;
+//   status: 'pendiente' | 'resuelto' | 'rechazado';
+//   reportedBy: string;
+//   reportedAt: string;
+//   resolvedBy?: string;
+//   resolvedAt?: string;
+// }
 
-interface User {
-  role: 'admin' | 'manager' | 'operator' | 'auditor';
-  name: string;
-}
+// interface User {
+//   role: 'admin' | 'manager' | 'operator' | 'auditor';
+//   name: string;
+// }
 
 interface IncidentManagementProps {
   products: Product[];
   incidents: Incident[];
-  onAddIncident: (incident: Omit<Incident, 'id' | 'reportedAt' | 'reportedBy' | 'status'>) => void;
+  onAddIncident: (incident: Omit<Incident, 'id' | 'reportedAt' | 'reportedBy' | 'status' | 'productName'>) => void;
   onResolveIncident: (id: string, status: 'resuelto' | 'rechazado') => void;
   user: User;
 }
@@ -42,7 +45,7 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [formData, setFormData] = useState({
-    productId: '',
+    productId: 0,
     type: 'daño' as 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro',
     quantity: 0,
     description: '',
@@ -56,7 +59,7 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
     if (formData.productId && formData.quantity > 0 && formData.description) {
       onAddIncident(formData);
       setFormData({
-        productId: '',
+        productId: 0,
         type: 'daño',
         quantity: 0,
         description: '',
@@ -297,7 +300,7 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
                 <select
                   required
                   value={formData.productId}
-                  onChange={(e) => setFormData({ ...formData, productId: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, productId: Number(e.target.value) })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
                   <option value="">Seleccionar producto...</option>

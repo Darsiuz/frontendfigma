@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { Search, Plus, Edit, Trash2, Package, Filter } from 'lucide-react';
 import { User } from '@/app/types/User';
-// interface User 
+import { Product } from '@/app/types/Product';
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  quantity: number;
-  minStock: number;
-  price: number;
-  location: string;
-}
+// interface Product {
+//   id: string;
+//   name: string;
+//   category: string;
+//   quantity: number;
+//   minStock: number;
+//   price: number;
+//   location: string;
+// }
 
 // interface User {
 //   role: 'admin' | 'manager' | 'operator';
@@ -20,7 +20,7 @@ interface Product {
 interface InventoryManagementProps {
   products: Product[];
   onEdit: (product: Product) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
   onAdd: () => void;
   user: User;
 }
@@ -36,12 +36,12 @@ export function InventoryManagement({ products, onEdit, onDelete, onAdd, user }:
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.location.toLowerCase().includes(searchTerm.toLowerCase());
+      product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
-    const matchesStock = stockFilter === 'all' || 
-                        (stockFilter === 'low' && product.quantity <= product.minStock) ||
-                        (stockFilter === 'normal' && product.quantity > product.minStock);
+    const matchesStock = stockFilter === 'all' ||
+      (stockFilter === 'low' && product.quantity <= product.minStock) ||
+      (stockFilter === 'normal' && product.quantity > product.minStock);
     return matchesSearch && matchesCategory && matchesStock;
   });
 

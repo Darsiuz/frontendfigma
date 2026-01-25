@@ -3,43 +3,46 @@
  */
 
 // TIPOS DE DATOS
-export interface Product {
-  id: string;
-  name: string;
-  category: string;
-  quantity: number;
-  minStock: number;
-  price: number;
-  location: string;
-}
+import type { Product } from '@/app/types/Product';
+import type { Movement } from '@/app/types/Movement';
+import type { Incident } from '@/app/types/Incident';
+// export interface Product {
+//   id: string;
+//   name: string;
+//   category: string;
+//   quantity: number;
+//   minStock: number;
+//   price: number;
+//   location: string;
+// }
 
-export interface Movement {
-  id: string;
-  productId: string;
-  productName: string;
-  type: 'entrada' | 'salida';
-  quantity: number;
-  date: string;
-  reason: string;
-  user: string;
-  status: 'pendiente' | 'aprobado' | 'rechazado';
-  reviewedBy?: string;
-  reviewedAt?: string;
-}
+// export interface Movement {
+//   id: string;
+//   productId: number;
+//   productName: string;
+//   type: 'entrada' | 'salida';
+//   quantity: number;
+//   date: string;
+//   reason: string;
+//   user: string;
+//   status: 'pendiente' | 'aprobado' | 'rechazado';
+//   reviewedBy?: string;
+//   reviewedAt?: string;
+// }
 
-export interface Incident {
-  id: string;
-  productId: string;
-  productName: string;
-  type: 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro';
-  quantity: number;
-  description: string;
-  status: 'pendiente' | 'resuelto' | 'rechazado';
-  reportedBy: string;
-  reportedAt: string;
-  resolvedBy?: string;
-  resolvedAt?: string;
-}
+// export interface Incident {
+//   id: string;
+//   productId: number;
+//   productName: string;
+//   type: 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro';
+//   quantity: number;
+//   description: string;
+//   status: 'pendiente' | 'resuelto' | 'rechazado';
+//   reportedBy: string;
+//   reportedAt: string;
+//   resolvedBy?: string;
+//   resolvedAt?: string;
+// }
 
 export interface AppUser {
   id: string;
@@ -98,7 +101,7 @@ export const SYSTEM_USERS: SystemUser[] = [
 
 export const INITIAL_PRODUCTS: Product[] = [
   { 
-    id: '1', 
+    id: 1, 
     name: 'Laptop HP Pavilion 15', 
     category: 'Electrónica', 
     quantity: 15, 
@@ -107,7 +110,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     location: 'Pasillo A, Estante 1' 
   },
   { 
-    id: '2', 
+    id: 2, 
     name: 'Mouse Logitech MX Master', 
     category: 'Accesorios', 
     quantity: 45, 
@@ -116,7 +119,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     location: 'Pasillo B, Estante 3' 
   },
   { 
-    id: '3', 
+    id: 3, 
     name: 'Teclado Mecánico RGB', 
     category: 'Accesorios', 
     quantity: 3, 
@@ -125,7 +128,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     location: 'Pasillo B, Estante 2' 
   },
   { 
-    id: '4', 
+    id: 4, 
     name: 'Monitor Dell 27"', 
     category: 'Electrónica', 
     quantity: 8, 
@@ -134,7 +137,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     location: 'Pasillo A, Estante 2' 
   },
   { 
-    id: '5', 
+    id: 5, 
     name: 'Silla Ergonómica', 
     category: 'Mobiliario', 
     quantity: 12, 
@@ -143,7 +146,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     location: 'Bodega Principal' 
   },
   { 
-    id: '6', 
+    id: 6, 
     name: 'Impresora Multifuncional', 
     category: 'Electrónica', 
     quantity: 6, 
@@ -152,7 +155,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     location: 'Pasillo C, Estante 1' 
   },
   { 
-    id: '7', 
+    id: 7, 
     name: 'Webcam HD 1080p', 
     category: 'Accesorios', 
     quantity: 25, 
@@ -161,7 +164,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     location: 'Pasillo B, Estante 1' 
   },
   { 
-    id: '8', 
+    id: 8, 
     name: 'Escritorio Ajustable', 
     category: 'Mobiliario', 
     quantity: 4, 
@@ -252,14 +255,14 @@ export const saveProducts = (products: Product[]): void => {
 export const createProduct = (productData: Omit<Product, 'id'>): Product => {
   const newProduct: Product = { 
     ...productData, 
-    id: Date.now().toString() 
+    id: Date.now() 
   };
   const products = loadProducts();
   saveProducts([...products, newProduct]);
   return newProduct;
 };
 
-export const updateProduct = (id: string, productData: Omit<Product, 'id'>): Product | null => {
+export const updateProduct = (id: number, productData: Omit<Product, 'id'>): Product | null => {
   const products = loadProducts();
   const index = products.findIndex(p => p.id === id);
   if (index === -1) return null;
@@ -270,7 +273,7 @@ export const updateProduct = (id: string, productData: Omit<Product, 'id'>): Pro
   return updatedProduct;
 };
 
-export const deleteProduct = (id: string): boolean => {
+export const deleteProduct = (id: number): boolean => {
   const products = loadProducts();
   const filtered = products.filter(p => p.id !== id);
   if (filtered.length === products.length) return false;
