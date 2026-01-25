@@ -83,7 +83,7 @@ export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, 
       id: 'approve',
       label: 'Aprobar Movimientos',
       icon: CheckCircle,
-      roles: ['manager']
+      roles: ['manager', 'admin']
     },
     {
       id: 'incidents',

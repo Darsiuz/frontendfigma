@@ -19,6 +19,7 @@ import { Incident } from '@/app/types/Incident';
 import * as DB from '@/services/database';
 import { login } from '@/services/auth.service';
 import * as ProductService from '@/services/product.service';
+import * as MovementService from '@/services/movement.service';
 
 import type { View } from '@/app/types/View';
 
@@ -112,7 +113,7 @@ function App() {
     // setMovements(DB.loadMovements());
     // setIncidents(DB.loadIncidents());
     // setAppUsers(DB.loadAppUsers());
-    // setSystemConfig(DB.loadSystemConfig());
+    setSystemConfig(DB.loadSystemConfig());
 
     const saved = localStorage.getItem('currentUser');
     if (saved) {
@@ -123,6 +124,10 @@ function App() {
     ProductService.getProducts()
       .then(setProducts)
       .catch(() => alert('Error cargando productos'));
+
+    MovementService.getMovements()
+      .then(setMovements)
+      .catch(() => alert('Error cargando movimientos'));
   }, []);
 
   // Guardar datos automáticamente
@@ -130,7 +135,7 @@ function App() {
   // useEffect(() => { if (movements.length > 0) DB.saveMovements(movements); }, [movements]);
   // useEffect(() => { if (incidents.length > 0) DB.saveIncidents(incidents); }, [incidents]);
   // useEffect(() => { if (appUsers.length > 0) DB.saveAppUsers(appUsers); }, [appUsers]);
-  // useEffect(() => { DB.saveSystemConfig(systemConfig); }, [systemConfig]);
+  useEffect(() => { DB.saveSystemConfig(systemConfig); }, [systemConfig]);
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -195,66 +200,33 @@ function App() {
   };
 
   // Gestión de movimientos
-  const handleAddMovement = (movementData: Omit<Movement, 'id' | 'date' | 'productName' | 'user' | 'status'>) => {
-    const product = products.find(p => p.id === movementData.productId);
-    if (!product || !currentUser) return;
-
-    const newMovement: Movement = {
-      ...movementData,
-      id: Date.now().toString(),
-      productName: product.name,
-      date: new Date().toISOString(),
-      user: currentUser.name,
-      status: systemConfig.autoApproveMovements ? 'aprobado' : 'pendiente'
-    };
-
-    // Si está aprobado automáticamente, actualizar stock
-    if (systemConfig.autoApproveMovements) {
-      const updatedProducts = products.map(p => {
-        if (p.id === movementData.productId) {
-          const newQuantity = movementData.type === 'entrada'
-            ? p.quantity + movementData.quantity
-            : p.quantity - movementData.quantity;
-          return { ...p, quantity: Math.max(0, newQuantity) };
-        }
-        return p;
-      });
-      setProducts(updatedProducts);
+  const handleAddMovement = async (
+    movementData: Omit<Movement, 'id' | 'date' | 'productName' | 'user' | 'status'>
+  ) => {
+    try {
+      const newMovement = await MovementService.createMovement(movementData);
+      setMovements([...movements, newMovement]);
+    } catch {
+      alert('Error registrando movimiento');
     }
-
-    setMovements([...movements, newMovement]);
   };
 
-  const handleApproveMovement = (id: string) => {
-    const movement = movements.find(m => m.id === id);
-    if (!movement || !currentUser) return;
-
-    // Actualizar stock
-    const updatedProducts = products.map(p => {
-      if (p.id === movement.productId) {
-        const newQuantity = movement.type === 'entrada'
-          ? p.quantity + movement.quantity
-          : p.quantity - movement.quantity;
-        return { ...p, quantity: Math.max(0, newQuantity) };
-      }
-      return p;
-    });
-
-    setProducts(updatedProducts);
-    setMovements(movements.map(m =>
-      m.id === id
-        ? { ...m, status: 'aprobado', reviewedBy: currentUser.name, reviewedAt: new Date().toISOString() }
-        : m
-    ));
+  const handleApproveMovement = async (id: string) => {
+    try {
+      const updated = await MovementService.approveMovement(id);
+      setMovements(movements.map(m => (m.id === id ? updated : m)));
+    } catch {
+      alert('Error aprobando movimiento');
+    }
   };
 
-  const handleRejectMovement = (id: string) => {
-    if (!currentUser) return;
-    setMovements(movements.map(m =>
-      m.id === id
-        ? { ...m, status: 'rechazado', reviewedBy: currentUser.name, reviewedAt: new Date().toISOString() }
-        : m
-    ));
+  const handleRejectMovement = async (id: string) => {
+    try {
+      const updated = await MovementService.rejectMovement(id);
+      setMovements(movements.map(m => (m.id === id ? updated : m)));
+    } catch {
+      alert('Error rechazando movimiento');
+    }
   };
 
   // Gestión de incidencias
