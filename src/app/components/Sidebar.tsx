@@ -1,25 +1,7 @@
-import { 
-  LayoutDashboard, 
-  Package, 
-  TrendingUp, 
-  Users, 
-  FileText, 
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-  Settings,
-  AlertTriangle,
-  CheckCircle,
-  Edit
-} from 'lucide-react';
-import { View } from '@/app/types/View';
+import { LayoutDashboard, Package, TrendingUp, Users, FileText, LogOut, ChevronLeft, ChevronRight, Settings, AlertTriangle, CheckCircle, Edit } from 'lucide-react';
+import type { View } from '@/app/types/View';
 import { User } from '@/app/types/User';
-
-// interface User {
-//   email: string;
-//   role: 'admin' | 'manager' | 'operator' | 'auditor';
-//   name: string;
-// }
+import { canAccessView } from '@/app/utils/sidebar.permissions';
 
 interface SidebarProps {
   currentView: View;
@@ -34,7 +16,6 @@ interface MenuItem {
   id: View;
   label: string;
   icon: any;
-  roles: ('admin' | 'manager' | 'operator' | 'auditor')[];
   badge?: number;
 }
 
@@ -44,112 +25,97 @@ export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, 
     {
       id: 'dashboard',
       label: 'Dashboard',
-      icon: LayoutDashboard,
-      roles: ['admin', 'manager', 'operator', 'auditor']
+      icon: LayoutDashboard
     },
     // Admin - 5 funcionalidades
     {
       id: 'inventory',
       label: 'Gestionar Inventario',
-      icon: Package,
-      roles: ['admin']
+      icon: Package
     },
     {
       id: 'users',
       label: 'Gestionar Usuarios',
-      icon: Users,
-      roles: ['admin']
+      icon: Users
     },
     {
       id: 'settings',
       label: 'Configuración Sistema',
-      icon: Settings,
-      roles: ['admin']
+      icon: Settings
     },
     {
       id: 'reports',
       label: 'Reportes Generales',
-      icon: FileText,
-      roles: ['admin']
+      icon: FileText
     },
     // Manager - 4 funcionalidades
     {
       id: 'supervise',
       label: 'Supervisar Inventario',
-      icon: Package,
-      roles: ['manager']
+      icon: Package
     },
     {
       id: 'approve',
       label: 'Aprobar Movimientos',
-      icon: CheckCircle,
-      roles: ['manager', 'admin']
+      icon: CheckCircle
     },
     {
       id: 'incidents',
       label: 'Ajustar por Incidencias',
-      icon: AlertTriangle,
-      roles: ['manager']
+      icon: AlertTriangle
     },
     {
       id: 'manager-reports',
       label: 'Reportes de Inventario',
-      icon: FileText,
-      roles: ['manager']
+      icon: FileText
     },
     // Operador - 4 funcionalidades
     {
       id: 'register-entry',
       label: 'Registrar Entradas',
-      icon: TrendingUp,
-      roles: ['operator']
+      icon: TrendingUp
     },
     {
       id: 'register-exit',
       label: 'Registrar Salidas',
-      icon: TrendingUp,
-      roles: ['operator']
+      icon: TrendingUp
     },
     {
       id: 'consult-inventory',
       label: 'Consultar Inventario',
-      icon: Package,
-      roles: ['operator']
+      icon: Package
     },
     {
       id: 'report-incident',
       label: 'Registrar Incidencias',
-      icon: AlertTriangle,
-      roles: ['operator']
+      icon: AlertTriangle
     },
     // Auditor - 4 funcionalidades
     {
+      id: 'export-audit',
+      label: 'Exportar para Auditoría',
+      icon: FileText
+    },
+    {
       id: 'audit-inventory',
       label: 'Consultar Inventario',
-      icon: Package,
-      roles: ['auditor']
+      icon: Package
     },
     {
       id: 'audit-movements',
       label: 'Historial de Movimientos',
-      icon: TrendingUp,
-      roles: ['auditor']
+      icon: TrendingUp
     },
     {
       id: 'audit-reports',
       label: 'Generar Reportes',
-      icon: FileText,
-      roles: ['auditor']
+      icon: FileText
     },
-    {
-      id: 'export-audit',
-      label: 'Exportar para Auditoría',
-      icon: FileText,
-      roles: ['auditor']
-    }
   ];
 
-  const visibleMenuItems = menuItems.filter(item => item.roles.includes(user.role));
+  const visibleMenuItems = menuItems.filter(item =>
+    canAccessView(user, item.id)
+  );
 
   const getRoleLabel = (role: string) => {
     const roles: { [key: string]: string } = {
@@ -172,9 +138,8 @@ export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, 
   };
 
   return (
-    <div className={`bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ${
-      isCollapsed ? 'w-20' : 'w-64'
-    }`}>
+    <div className={`bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
+      }`}>
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
@@ -239,11 +204,10 @@ export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, 
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                isActive
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'text-gray-700 hover:bg-gray-100'
-              } ${isCollapsed ? 'justify-center' : ''}`}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isActive
+                ? 'bg-blue-50 text-blue-600'
+                : 'text-gray-700 hover:bg-gray-100'
+                } ${isCollapsed ? 'justify-center' : ''}`}
               title={isCollapsed ? item.label : ''}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
@@ -264,9 +228,8 @@ export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, 
       <div className="p-4 border-t border-gray-200">
         <button
           onClick={onLogout}
-          className={`w-full flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors ${
-            isCollapsed ? 'justify-center' : ''
-          }`}
+          className={`w-full flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors ${isCollapsed ? 'justify-center' : ''
+            }`}
           title={isCollapsed ? 'Cerrar Sesión' : ''}
         >
           <LogOut className="w-5 h-5 flex-shrink-0" />

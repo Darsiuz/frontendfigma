@@ -1,19 +1,6 @@
 import { useState } from 'react';
 import { Clock, CheckCircle, XCircle, ArrowUpCircle, ArrowDownCircle, Filter } from 'lucide-react';
-import type { Movement } from '@/app/types/Movement';
-// interface Movement {
-//   id: string;
-//   productId: string;
-//   productName: string;
-//   type: 'entrada' | 'salida';
-//   quantity: number;
-//   date: string;
-//   reason: string;
-//   user: string;
-//   status: 'pendiente' | 'aprobado' | 'rechazado';
-//   reviewedBy?: string;
-//   reviewedAt?: string;
-// }
+import { Movement } from '@/app/types/Movement';
 
 interface ApproveMovementsProps {
   movements: Movement[];

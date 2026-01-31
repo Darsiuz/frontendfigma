@@ -2,20 +2,7 @@ import { useState } from 'react';
 import { Search, Plus, Edit, Trash2, Package, Filter } from 'lucide-react';
 import { User } from '@/app/types/User';
 import { Product } from '@/app/types/Product';
-
-// interface Product {
-//   id: string;
-//   name: string;
-//   category: string;
-//   quantity: number;
-//   minStock: number;
-//   price: number;
-//   location: string;
-// }
-
-// interface User {
-//   role: 'admin' | 'manager' | 'operator';
-// }
+import { canCreateProduct, canEditProduct, canDeleteProduct } from '@/app/utils/permissions';
 
 interface InventoryManagementProps {
   products: Product[];
@@ -32,7 +19,10 @@ export function InventoryManagement({ products, onEdit, onDelete, onAdd, user }:
 
   const categories = ['all', ...new Set(products.map(p => p.category))];
 
-  const canEdit = user.role === 'admin' || user.role === 'manager';
+  // const canEdit = user.role === 'admin' || user.role === 'manager';
+  const canCreate = canCreateProduct(user);
+  const canEdit = canEditProduct(user);
+  const canDelete = canDeleteProduct(user);
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -53,7 +43,7 @@ export function InventoryManagement({ products, onEdit, onDelete, onAdd, user }:
           <h2 className="text-2xl font-bold text-gray-900">Gestión de Inventario</h2>
           <p className="text-gray-600 mt-1">Administre los productos del almacén</p>
         </div>
-        {canEdit && (
+        {canCreate && (
           <button
             onClick={onAdd}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -222,17 +212,21 @@ export function InventoryManagement({ products, onEdit, onDelete, onAdd, user }:
                         >
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => {
-                            if (confirm(`¿Está seguro de eliminar "${product.name}"?`)) {
-                              onDelete(product.id);
-                            }
-                          }}
-                          className="text-red-600 hover:text-red-900"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {canDelete && (
+                          <button
+                            onClick={() => {
+                              if (confirm(`¿Está seguro de eliminar "${product.name}"?`)) {
+                                onDelete(product.id);
+                              }
+                            }}
+                            className="text-red-600 hover:text-red-900"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+
+
                       </td>
                     )}
                   </tr>

@@ -105,7 +105,7 @@ export function Login({ onLogin }: LoginProps) {
 
           {/* Usuarios de demostración */}
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-600 mb-3">Usuarios de demostración:</p>
+            <p className="text-sm text-gray-600 mb-3">Usuarios de prueba:</p>
             <div className="space-y-2">
               {demoUsers.map((user, index) => (
                 <button

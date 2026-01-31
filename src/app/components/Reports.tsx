@@ -4,27 +4,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import type { Product } from '@/app/types/Product';
 import type { Movement } from '@/app/types/Movement';
 
-// interface Product {
-//   id: string;
-//   name: string;
-//   category: string;
-//   quantity: number;
-//   minStock: number;
-//   price: number;
-//   location: string;
-// }
-
-// interface Movement {
-//   id: string;
-//   productId: string;
-//   productName: string;
-//   type: 'entrada' | 'salida';
-//   quantity: number;
-//   date: string;
-//   reason: string;
-//   user: string;
-// }
-
 interface ReportsProps {
   products: Product[];
   movements: Movement[];

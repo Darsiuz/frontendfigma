@@ -3,36 +3,7 @@ import { Plus, ArrowUpCircle, ArrowDownCircle, X, Calendar, Filter, Download, Ac
 import { Product } from '@/app/types/Product';
 import { Movement } from '@/app/types/Movement';
 import { User } from '@/app/types/User';
-
-
-// interface Product {
-//   id: string;
-//   name: string;
-//   category: string;
-//   quantity: number;
-//   minStock: number;
-//   price: number;
-//   location: string;
-// }
-
-// interface Movement {
-//   id: string;
-//   productId: string;
-//   productName: string;
-//   type: 'entrada' | 'salida';
-//   quantity: number;
-//   date: string;
-//   reason: string;
-//   user: string;
-//   status?: 'pendiente' | 'aprobado' | 'rechazado';
-//   reviewedBy?: string;
-//   reviewedAt?: string;
-// }
-
-// interface User {
-//   role: 'admin' | 'manager' | 'operator' | 'auditor';
-//   name: string;
-// }
+import { canCreateMovement } from '@/app/utils/permissions';
 
 interface StockMovementsProps {
   products: Product[];
@@ -54,7 +25,8 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
   const [searchTerm, setSearchTerm] = useState('');
 
   // Admin, Manager y Operator pueden registrar movimientos
-  const canEdit = user.role === 'admin' || user.role === 'manager' || user.role === 'operator';
+  // const canEdit = user.role === 'admin' || user.role === 'manager' || user.role === 'operator';
+  const canCreate = canCreateMovement(user);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,7 +118,7 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
             <Download className="w-5 h-5" />
             Exportar
           </button>
-          {canEdit && (
+          {canCreate && (
             <button
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -214,7 +186,7 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
           <div className="text-center py-12">
             <Activity className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">No hay movimientos que mostrar</p>
-            {canEdit && (
+            {canCreate && (
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="mt-4 text-blue-600 hover:text-blue-700 font-medium"

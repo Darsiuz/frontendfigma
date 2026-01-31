@@ -4,35 +4,6 @@ import type { User } from '@/app/types/User';
 import type { Product } from '@/app/types/Product';
 import type { Incident } from '@/app/types/Incident';
 
-// interface Product {
-//   id: string;
-//   name: string;
-//   category: string;
-//   quantity: number;
-//   minStock: number;
-//   price: number;
-//   location: string;
-// }
-
-// interface Incident {
-//   id: string;
-//   productId: string;
-//   productName: string;
-//   type: 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro';
-//   quantity: number;
-//   description: string;
-//   status: 'pendiente' | 'resuelto' | 'rechazado';
-//   reportedBy: string;
-//   reportedAt: string;
-//   resolvedBy?: string;
-//   resolvedAt?: string;
-// }
-
-// interface User {
-//   role: 'admin' | 'manager' | 'operator' | 'auditor';
-//   name: string;
-// }
-
 interface IncidentManagementProps {
   products: Product[];
   incidents: Incident[];
@@ -73,7 +44,7 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
     return incident.status === statusFilter;
   });
 
-  const sortedIncidents = [...filteredIncidents].sort((a, b) => 
+  const sortedIncidents = [...filteredIncidents].sort((a, b) =>
     new Date(b.reportedAt).getTime() - new Date(a.reportedAt).getTime()
   );
 
@@ -117,7 +88,7 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
             {user.role === 'operator' ? 'Registrar Incidencias' : 'Gestión de Incidencias'}
           </h2>
           <p className="text-gray-600 mt-1">
-            {user.role === 'operator' 
+            {user.role === 'operator'
               ? 'Reporte problemas y anomalías en el inventario'
               : 'Gestione y resuelva incidencias del inventario'}
           </p>
@@ -138,41 +109,37 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
         <div className="flex gap-2">
           <button
             onClick={() => setStatusFilter('all')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              statusFilter === 'all'
+            className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === 'all'
                 ? 'bg-blue-100 text-blue-700'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+              }`}
           >
             Todas
           </button>
           <button
             onClick={() => setStatusFilter('pendiente')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              statusFilter === 'pendiente'
+            className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === 'pendiente'
                 ? 'bg-yellow-100 text-yellow-700'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+              }`}
           >
             Pendientes
           </button>
           <button
             onClick={() => setStatusFilter('resuelto')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              statusFilter === 'resuelto'
+            className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === 'resuelto'
                 ? 'bg-green-100 text-green-700'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+              }`}
           >
             Resueltas
           </button>
           <button
             onClick={() => setStatusFilter('rechazado')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              statusFilter === 'rechazado'
+            className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === 'rechazado'
                 ? 'bg-red-100 text-red-700'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+              }`}
           >
             Rechazadas
           </button>

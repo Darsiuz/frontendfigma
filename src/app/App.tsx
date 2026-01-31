@@ -22,6 +22,8 @@ import * as ProductService from '@/services/product.service';
 import * as MovementService from '@/services/movement.service';
 import * as IncidentService from '@/services/incident.service';
 
+import { canAccessView } from '@/app/utils/sidebar.permissions';
+
 import type { View } from '@/app/types/View';
 interface SystemConfig {
   companyName: string;
@@ -82,6 +84,14 @@ function App() {
   // useEffect(() => { if (incidents.length > 0) DB.saveIncidents(incidents); }, [incidents]);
   // useEffect(() => { if (appUsers.length > 0) DB.saveAppUsers(appUsers); }, [appUsers]);
   useEffect(() => { DB.saveSystemConfig(systemConfig); }, [systemConfig]);
+
+  // Redirigir al que no tiene acceso a la vista actual
+  useEffect(() => {
+    if (currentUser && !canAccessView(currentUser, currentView)) {
+      setCurrentView('dashboard');
+    }
+  }, [currentView, currentUser]);
+
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -244,6 +254,8 @@ function App() {
     return titles[currentView] || 'Dashboard';
   };
 
+  const canRenderView = currentUser ? canAccessView(currentUser, currentView) : false;
+
   return (
     <div className="flex h-screen bg-gray-100">
       <Sidebar
@@ -266,31 +278,46 @@ function App() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-6">
-          {currentView === 'dashboard' && <DashboardView products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+          {!canRenderView ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-800">
+                  Acceso restringido :V
+                </h2>
+                <p className="text-gray-600 mt-2">
+                  No tienes permisos para acceder a esta seccion
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {currentView === 'dashboard' && <DashboardView products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
 
-          {/* Admin */}
-          {currentView === 'inventory' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}
-          {currentView === 'users' && <UserManagement />}
-          {currentView === 'settings' && <SystemSettings config={systemConfig} onSave={handleSaveConfig} />}
-          {currentView === 'reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+              {/* Admin */}
+              {currentView === 'inventory' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}
+              {currentView === 'users' && <UserManagement />}
+              {currentView === 'settings' && <SystemSettings config={systemConfig} onSave={handleSaveConfig} />}
+              {currentView === 'reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
 
-          {/* Manager */}
-          {currentView === 'supervise' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}
-          {currentView === 'approve' && <ApproveMovements movements={movements} onApprove={handleApproveMovement} onReject={handleRejectMovement} />}
-          {currentView === 'incidents' && <IncidentManagement products={products} incidents={incidents} onAddIncident={handleAddIncident} onResolveIncident={handleResolveIncident} user={currentUser} />}
-          {currentView === 'manager-reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+              {/* Manager */}
+              {currentView === 'supervise' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}
+              {currentView === 'approve' && <ApproveMovements movements={movements} onApprove={handleApproveMovement} onReject={handleRejectMovement} />}
+              {currentView === 'incidents' && <IncidentManagement products={products} incidents={incidents} onAddIncident={handleAddIncident} onResolveIncident={handleResolveIncident} user={currentUser} />}
+              {currentView === 'manager-reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
 
-          {/* Operator */}
-          {currentView === 'register-entry' && <StockMovements products={products} movements={movements} onAddMovement={handleAddMovement} user={currentUser} />}
-          {currentView === 'register-exit' && <StockMovements products={products} movements={movements} onAddMovement={handleAddMovement} user={currentUser} />}
-          {currentView === 'consult-inventory' && <InventoryManagement products={products} onEdit={(p) => { }} onDelete={() => { }} onAdd={() => { }} user={currentUser} />}
-          {currentView === 'report-incident' && <IncidentManagement products={products} incidents={incidents} onAddIncident={handleAddIncident} onResolveIncident={handleResolveIncident} user={currentUser} />}
+              {/* Operator */}
+              {currentView === 'register-entry' && <StockMovements products={products} movements={movements} onAddMovement={handleAddMovement} user={currentUser} />}
+              {currentView === 'register-exit' && <StockMovements products={products} movements={movements} onAddMovement={handleAddMovement} user={currentUser} />}
+              {currentView === 'consult-inventory' && <InventoryManagement products={products} onEdit={(p) => { }} onDelete={() => { }} onAdd={() => { }} user={currentUser} />}
+              {currentView === 'report-incident' && <IncidentManagement products={products} incidents={incidents} onAddIncident={handleAddIncident} onResolveIncident={handleResolveIncident} user={currentUser} />}
 
-          {/* Auditor */}
-          {currentView === 'audit-inventory' && <InventoryManagement products={products} onEdit={(p) => { }} onDelete={() => { }} onAdd={() => { }} user={currentUser} />}
-          {currentView === 'audit-movements' && <StockMovements products={products} movements={movements.filter(m => m.status === 'aprobado')} onAddMovement={handleAddMovement} user={currentUser} />}
-          {currentView === 'audit-reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
-          {currentView === 'export-audit' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+              {/* Auditor */}
+              {currentView === 'audit-inventory' && <InventoryManagement products={products} onEdit={(p) => { }} onDelete={() => { }} onAdd={() => { }} user={currentUser} />}
+              {currentView === 'audit-movements' && <StockMovements products={products} movements={movements.filter(m => m.status === 'aprobado')} onAddMovement={handleAddMovement} user={currentUser} />}
+              {currentView === 'audit-reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+              {currentView === 'export-audit' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+            </>
+          )}
         </main>
       </div>
 

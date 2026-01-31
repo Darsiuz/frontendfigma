@@ -2,21 +2,6 @@ import { useEffect, useState } from "react";
 import { getUsers, createUser, updateUser, deleteUser, disableUser } from "@/services/user.service";
 import { Users, Plus, Edit, Trash2, X, Shield, Mail, User as UserIcon } from 'lucide-react';
 import type { AppUser, ApiUser } from '@/app/types/User';
-// interface AppUser {
-//   id: string;
-//   name: string;
-//   email: string;
-//   role: UserRole;
-//   status: 'active' | 'inactive';
-//   createdAt: string;
-// }
-
-// interface UserManagementProps {
-//   users: AppUser[];
-//   onAddUser: (user: Omit<AppUser, 'id' | 'createdAt'>) => void;
-//   onEditUser: (id: string, user: Omit<AppUser, 'id' | 'createdAt'>) => void;
-//   onDeleteUser: (id: string) => void;
-// }
 
 export function UserManagement() {
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -35,15 +20,6 @@ export function UserManagement() {
     const loadUsers = async () => {
       try {
         const data = await getUsers();
-
-        // const mapped = data.map((u: ApiUser) => ({
-        //   id: u.id.toString(),
-        //   name: u.name,
-        //   email: u.email,
-        //   role: u.role.name.toLowerCase() as AppUser["role"],
-        //   status: (u.active ? "active" : "inactive") as AppUser["status"],
-        //   createdAt: u.createdAt,
-        // }));
 
         setUsers(data.map(mapApiUserToAppUser));
       } catch (e) {
