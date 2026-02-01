@@ -2,6 +2,7 @@ import { LayoutDashboard, Package, TrendingUp, Users, FileText, LogOut, ChevronL
 import type { View } from '@/app/types/View';
 import { User } from '@/app/types/User';
 import { canAccessView } from '@/app/utils/sidebar.permissions';
+import { VIEWS_CONFIG } from '@/app/utils/views.config';
 
 interface SidebarProps {
   currentView: View;
@@ -11,111 +12,110 @@ interface SidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
 }
-
-interface MenuItem {
-  id: View;
-  label: string;
-  icon: any;
-  badge?: number;
-}
+// interface MenuItem {
+//   id: View;
+//   label: string;
+//   icon: any;
+//   badge?: number;
+// }
 
 export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, onToggleCollapse }: SidebarProps) {
-  const menuItems: MenuItem[] = [
-    // Dashboard - Todos
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      icon: LayoutDashboard
-    },
-    // Admin - 5 funcionalidades
-    {
-      id: 'inventory',
-      label: 'Gestionar Inventario',
-      icon: Package
-    },
-    {
-      id: 'users',
-      label: 'Gestionar Usuarios',
-      icon: Users
-    },
-    {
-      id: 'settings',
-      label: 'Configuración Sistema',
-      icon: Settings
-    },
-    {
-      id: 'reports',
-      label: 'Reportes Generales',
-      icon: FileText
-    },
-    // Manager - 4 funcionalidades
-    {
-      id: 'supervise',
-      label: 'Supervisar Inventario',
-      icon: Package
-    },
-    {
-      id: 'approve',
-      label: 'Aprobar Movimientos',
-      icon: CheckCircle
-    },
-    {
-      id: 'incidents',
-      label: 'Ajustar por Incidencias',
-      icon: AlertTriangle
-    },
-    {
-      id: 'manager-reports',
-      label: 'Reportes de Inventario',
-      icon: FileText
-    },
-    // Operador - 4 funcionalidades
-    {
-      id: 'register-entry',
-      label: 'Registrar Entradas',
-      icon: TrendingUp
-    },
-    {
-      id: 'register-exit',
-      label: 'Registrar Salidas',
-      icon: TrendingUp
-    },
-    {
-      id: 'consult-inventory',
-      label: 'Consultar Inventario',
-      icon: Package
-    },
-    {
-      id: 'report-incident',
-      label: 'Registrar Incidencias',
-      icon: AlertTriangle
-    },
-    // Auditor - 4 funcionalidades
-    {
-      id: 'export-audit',
-      label: 'Exportar para Auditoría',
-      icon: FileText
-    },
-    {
-      id: 'audit-inventory',
-      label: 'Consultar Inventario',
-      icon: Package
-    },
-    {
-      id: 'audit-movements',
-      label: 'Historial de Movimientos',
-      icon: TrendingUp
-    },
-    {
-      id: 'audit-reports',
-      label: 'Generar Reportes',
-      icon: FileText
-    },
-  ];
+  // const menuItems: MenuItem[] = [
+  //   // Dashboard - Todos
+  //   {
+  //     id: 'dashboard',
+  //     label: 'Dashboard',
+  //     icon: LayoutDashboard
+  //   },
+  //   // Admin - 5 funcionalidades
+  //   {
+  //     id: 'inventory',
+  //     label: 'Gestionar Inventario',
+  //     icon: Package
+  //   },
+  //   {
+  //     id: 'users',
+  //     label: 'Gestionar Usuarios',
+  //     icon: Users
+  //   },
+  //   {
+  //     id: 'settings',
+  //     label: 'Configuración Sistema',
+  //     icon: Settings
+  //   },
+  //   {
+  //     id: 'reports',
+  //     label: 'Reportes Generales',
+  //     icon: FileText
+  //   },
+  //   // Manager - 4 funcionalidades
+  //   {
+  //     id: 'supervise',
+  //     label: 'Supervisar Inventario',
+  //     icon: Package
+  //   },
+  //   {
+  //     id: 'approve',
+  //     label: 'Aprobar Movimientos',
+  //     icon: CheckCircle
+  //   },
+  //   {
+  //     id: 'incidents',
+  //     label: 'Ajustar por Incidencias',
+  //     icon: AlertTriangle
+  //   },
+  //   {
+  //     id: 'manager-reports',
+  //     label: 'Reportes de Inventario',
+  //     icon: FileText
+  //   },
+  //   // Operador - 4 funcionalidades
+  //   {
+  //     id: 'register-entry',
+  //     label: 'Registrar Entradas',
+  //     icon: TrendingUp
+  //   },
+  //   {
+  //     id: 'register-exit',
+  //     label: 'Registrar Salidas',
+  //     icon: TrendingUp
+  //   },
+  //   {
+  //     id: 'consult-inventory',
+  //     label: 'Consultar Inventario',
+  //     icon: Package
+  //   },
+  //   {
+  //     id: 'report-incident',
+  //     label: 'Registrar Incidencias',
+  //     icon: AlertTriangle
+  //   },
+  //   // Auditor - 4 funcionalidades
+  //   {
+  //     id: 'export-audit',
+  //     label: 'Exportar para Auditoría',
+  //     icon: FileText
+  //   },
+  //   {
+  //     id: 'audit-inventory',
+  //     label: 'Consultar Inventario',
+  //     icon: Package
+  //   },
+  //   {
+  //     id: 'audit-movements',
+  //     label: 'Historial de Movimientos',
+  //     icon: TrendingUp
+  //   },
+  //   {
+  //     id: 'audit-reports',
+  //     label: 'Generar Reportes',
+  //     icon: FileText
+  //   },
+  // ];
 
-  const visibleMenuItems = menuItems.filter(item =>
-    canAccessView(user, item.id)
-  );
+  const visibleMenuItems = VIEWS_CONFIG.filter(view =>
+  canAccessView(user, view.id)
+);
 
   const getRoleLabel = (role: string) => {
     const roles: { [key: string]: string } = {

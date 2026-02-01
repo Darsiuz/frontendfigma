@@ -10,6 +10,8 @@ import { ProductForm } from '@/app/components/ProductForm';
 import { SystemSettings } from '@/app/components/SystemSettings';
 import { IncidentManagement } from '@/app/components/IncidentManagement';
 import { ApproveMovements } from '@/app/components/ApproveMovements';
+import { getDefaultViewByRole } from '@/app/utils/defaultViewByRole';
+import { getViewLabel } from '@/app/utils/views.helpers';
 
 import { User } from '@/app/types/User';
 import { Product } from '@/app/types/Product';
@@ -39,6 +41,7 @@ interface SystemConfig {
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true); // esto es para manejar la carga antes de login
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -64,6 +67,7 @@ function App() {
       setCurrentUser(JSON.parse(saved));
       setIsLoggedIn(true);
     }
+    setAuthLoading(false);
 
     ProductService.getProducts()
       .then(setProducts)
@@ -88,7 +92,7 @@ function App() {
   // Redirigir al que no tiene acceso a la vista actual
   useEffect(() => {
     if (currentUser && !canAccessView(currentUser, currentView)) {
-      setCurrentView('dashboard');
+      setCurrentView(getDefaultViewByRole(currentUser));
     }
   }, [currentView, currentUser]);
 
@@ -107,6 +111,8 @@ function App() {
 
       setCurrentUser(mappedUser);
       setIsLoggedIn(true);
+
+      setCurrentView(getDefaultViewByRole(mappedUser));
 
     } catch (error) {
       alert("Credenciales incorrectas");
@@ -231,31 +237,40 @@ function App() {
     return <Login onLogin={handleLogin} />;
   }
 
-  const getViewTitle = () => {
-    const titles: { [key: string]: string } = {
-      dashboard: 'Dashboard General',
-      inventory: 'Gestionar Inventario',
-      users: 'Gestionar Usuarios',
-      settings: 'Configuración del Sistema',
-      reports: 'Reportes Generales',
-      supervise: 'Supervisar Inventario',
-      approve: 'Aprobar Movimientos',
-      incidents: 'Ajustar por Incidencias',
-      'manager-reports': 'Reportes de Inventario',
-      'register-entry': 'Registrar Entradas',
-      'register-exit': 'Registrar Salidas',
-      'consult-inventory': 'Consultar Inventario',
-      'report-incident': 'Registrar Incidencias',
-      'audit-inventory': 'Consultar Inventario',
-      'audit-movements': 'Historial de Movimientos',
-      'audit-reports': 'Generar Reportes',
-      'export-audit': 'Exportar para Auditoría'
-    };
-    return titles[currentView] || 'Dashboard';
-  };
+  // const getViewTitle = () => {
+  //   const titles: { [key: string]: string } = {
+  //     dashboard: 'Dashboard General',
+  //     inventory: 'Gestionar Inventario',
+  //     users: 'Gestionar Usuarios',
+  //     settings: 'Configuración del Sistema',
+  //     reports: 'Reportes Generales',
+  //     supervise: 'Supervisar Inventario',
+  //     approve: 'Aprobar Movimientos',
+  //     incidents: 'Ajustar por Incidencias',
+  //     'manager-reports': 'Reportes de Inventario',
+  //     'register-entry': 'Registrar Entradas',
+  //     'register-exit': 'Registrar Salidas',
+  //     'consult-inventory': 'Consultar Inventario',
+  //     'report-incident': 'Registrar Incidencias',
+  //     'audit-inventory': 'Consultar Inventario',
+  //     'audit-movements': 'Historial de Movimientos',
+  //     'audit-reports': 'Generar Reportes',
+  //     'export-audit': 'Exportar para Auditoría'
+  //   };
+  //   return titles[currentView] || 'Dashboard';
+  // };
 
   const canRenderView = currentUser ? canAccessView(currentUser, currentView) : false;
 
+  if (authLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <span className="text-gray-600 text-lg">
+          Cargando permisos...
+        </span>
+      </div>
+    );
+  }
   return (
     <div className="flex h-screen bg-gray-100">
       <Sidebar
@@ -271,7 +286,7 @@ function App() {
         <header className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{getViewTitle()}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{getViewLabel(currentView)}</h1>
               <p className="text-sm text-gray-600 mt-1">Bienvenido, {currentUser.name}</p>
             </div>
           </div>

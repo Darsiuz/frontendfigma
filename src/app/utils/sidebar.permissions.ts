@@ -5,7 +5,8 @@ export const canAccessView = (user: User, view: View): boolean => {
   switch (view) {
     // Dashboard
     case 'dashboard':
-      return true; // esto es que es visto por todos
+      // return true; // esto es que es visto por todos
+      return user.role === 'admin' || user.role === 'manager' || user.role === 'operator';
 
     // Admin
     case 'inventory':
