@@ -1,28 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Settings, Save, RotateCcw } from 'lucide-react';
+import { SystemConfig } from '@/app/types/SystemConfig';
 
-interface SystemConfig {
-  companyName: string;
-  lowStockThreshold: number;
-  currency: string;
-  autoApproveMovements: boolean;
-  requireIncidentApproval: boolean;
-  enableNotifications: boolean;
-  defaultLocation: string;
-  maxStockPerProduct: number;
-}
 
 interface SystemSettingsProps {
-  config: SystemConfig;
+  config: SystemConfig | null;
   onSave: (config: SystemConfig) => void;
 }
 
 export function SystemSettings({ config, onSave }: SystemSettingsProps) {
-  const [formData, setFormData] = useState<SystemConfig>(config);
+  // const [formData, setFormData] = useState<SystemConfig>(config);
+  const [formData, setFormData] = useState<SystemConfig | null>(config);
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    setFormData(config);
+    if (config) {
+      setFormData(config);
+    }
   }, [config]);
 
   useEffect(() => {
@@ -32,6 +26,9 @@ export function SystemSettings({ config, onSave }: SystemSettingsProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData) return;
+
     onSave(formData);
     setHasChanges(false);
   };
@@ -41,6 +38,13 @@ export function SystemSettings({ config, onSave }: SystemSettingsProps) {
     setHasChanges(false);
   };
 
+  if (!formData) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <span className="text-gray-500">Cargando configuracion del sistema...</span>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -63,7 +67,7 @@ export function SystemSettings({ config, onSave }: SystemSettingsProps) {
               </label>
               <input
                 type="text"
-                value={formData.companyName}
+                value={formData.companyName ?? ''}
                 onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -73,7 +77,7 @@ export function SystemSettings({ config, onSave }: SystemSettingsProps) {
                 Moneda
               </label>
               <select
-                value={formData.currency}
+                value={formData.currency ?? ''}
                 onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >

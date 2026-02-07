@@ -17,12 +17,11 @@ import { User } from '@/app/types/User';
 import { Product } from '@/app/types/Product';
 import { Movement } from '@/app/types/Movement';
 import { Incident } from '@/app/types/Incident';
-
-import * as DB from '@/services/database';
 import { login } from '@/services/auth.service';
 import * as ProductService from '@/services/product.service';
 import * as MovementService from '@/services/movement.service';
 import * as IncidentService from '@/services/incident.service';
+import * as SystemConfigService from '@/services/systemConfig.service';
 
 import { canAccessView } from '@/app/utils/sidebar.permissions';
 
@@ -49,19 +48,13 @@ function App() {
   const [movements, setMovements] = useState<Movement[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   // const [appUsers, setAppUsers] = useState<AppUser[]>([]);
-  const [systemConfig, setSystemConfig] = useState<SystemConfig>(DB.DEFAULT_CONFIG);
+  const [systemConfig, setSystemConfig] = useState<SystemConfig | null>(null);
 
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // Cargar datos desde el servicio de base de datos
   useEffect(() => {
-    // setProducts(DB.loadProducts());
-    // setMovements(DB.loadMovements());
-    // setIncidents(DB.loadIncidents());
-    // setAppUsers(DB.loadAppUsers());
-    setSystemConfig(DB.loadSystemConfig());
-
     const saved = localStorage.getItem('currentUser');
     if (saved) {
       setCurrentUser(JSON.parse(saved));
@@ -80,14 +73,11 @@ function App() {
     IncidentService.getIncidents()
       .then(setIncidents)
       .catch(() => alert('Error cargando incidencias'));
-  }, []);
 
-  // Guardar datos automáticamente
-  // useEffect(() => { if (products.length > 0) DB.saveProducts(products); }, [products]);
-  // useEffect(() => { if (movements.length > 0) DB.saveMovements(movements); }, [movements]);
-  // useEffect(() => { if (incidents.length > 0) DB.saveIncidents(incidents); }, [incidents]);
-  // useEffect(() => { if (appUsers.length > 0) DB.saveAppUsers(appUsers); }, [appUsers]);
-  useEffect(() => { DB.saveSystemConfig(systemConfig); }, [systemConfig]);
+    SystemConfigService.getSystemConfig()
+      .then(setSystemConfig)
+      .catch(() => alert('Error cargando configuracion del sistema'));
+  }, []);
 
   // Redirigir al que no tiene acceso a la vista actual
   useEffect(() => {
@@ -229,36 +219,19 @@ function App() {
   // };
 
   // Configuración del sistema
-  const handleSaveConfig = (config: SystemConfig) => {
-    setSystemConfig(config);
+  const handleSaveConfig = async (config: SystemConfig) => {
+    try {
+      const updated = await SystemConfigService.updateSystemConfig(config);
+      setSystemConfig(updated);
+      alert('Configuracion guardada correctamente');
+    } catch {
+      alert('Error guardando configuracion');
+    }
   };
 
   if (!isLoggedIn || !currentUser) {
     return <Login onLogin={handleLogin} />;
   }
-
-  // const getViewTitle = () => {
-  //   const titles: { [key: string]: string } = {
-  //     dashboard: 'Dashboard General',
-  //     inventory: 'Gestionar Inventario',
-  //     users: 'Gestionar Usuarios',
-  //     settings: 'Configuración del Sistema',
-  //     reports: 'Reportes Generales',
-  //     supervise: 'Supervisar Inventario',
-  //     approve: 'Aprobar Movimientos',
-  //     incidents: 'Ajustar por Incidencias',
-  //     'manager-reports': 'Reportes de Inventario',
-  //     'register-entry': 'Registrar Entradas',
-  //     'register-exit': 'Registrar Salidas',
-  //     'consult-inventory': 'Consultar Inventario',
-  //     'report-incident': 'Registrar Incidencias',
-  //     'audit-inventory': 'Consultar Inventario',
-  //     'audit-movements': 'Historial de Movimientos',
-  //     'audit-reports': 'Generar Reportes',
-  //     'export-audit': 'Exportar para Auditoría'
-  //   };
-  //   return titles[currentView] || 'Dashboard';
-  // };
 
   const canRenderView = currentUser ? canAccessView(currentUser, currentView) : false;
 
@@ -311,7 +284,7 @@ function App() {
               {/* Admin */}
               {currentView === 'inventory' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}
               {currentView === 'users' && <UserManagement />}
-              {currentView === 'settings' && <SystemSettings config={systemConfig} onSave={handleSaveConfig} />}
+              {currentView === 'settings' && systemConfig && (<SystemSettings config={systemConfig} onSave={handleSaveConfig} />)}
               {currentView === 'reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
 
               {/* Manager */}
