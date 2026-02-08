@@ -53,31 +53,60 @@ function App() {
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  // Cargar datos desde el servicio de base de datos
   useEffect(() => {
-    const saved = localStorage.getItem('currentUser');
-    if (saved) {
+    const saved = localStorage.getItem("currentUser");
+    const token = localStorage.getItem("token");
+
+    if (saved && token) {
       setCurrentUser(JSON.parse(saved));
       setIsLoggedIn(true);
     }
+
     setAuthLoading(false);
-
-    ProductService.getProducts()
-      .then(setProducts)
-      .catch(() => alert('Error cargando productos'));
-
-    MovementService.getMovements()
-      .then(setMovements)
-      .catch(() => alert('Error cargando movimientos'));
-
-    IncidentService.getIncidents()
-      .then(setIncidents)
-      .catch(() => alert('Error cargando incidencias'));
-
-    SystemConfigService.getSystemConfig()
-      .then(setSystemConfig)
-      .catch(() => alert('Error cargando configuracion del sistema'));
   }, []);
+
+  // Cargar datos desde el servicio de base de datos
+  useEffect(() => {
+    if (!isLoggedIn || !currentUser) return;
+
+    // Productos
+    if (canAccessView(currentUser, 'inventory') ||
+      canAccessView(currentUser, 'consult-inventory') ||
+      canAccessView(currentUser, 'audit-inventory')) {
+
+      ProductService.getProducts()
+        .then(setProducts)
+        .catch(() => console.warn('Productos no cargados'));
+    }
+
+    // Movimientos
+    if (canAccessView(currentUser, 'audit-movements') ||
+      canAccessView(currentUser, 'approve') ||
+      canAccessView(currentUser, 'register-entry') ||
+      canAccessView(currentUser, 'register-exit')) {
+
+      MovementService.getMovements()
+        .then(setMovements)
+        .catch(() => console.warn('Movimientos no cargados'));
+    }
+
+    // Incidencias
+    if (canAccessView(currentUser, 'incidents') ||
+      canAccessView(currentUser, 'report-incident')) {
+
+      IncidentService.getIncidents()
+        .then(setIncidents)
+        .catch(() => console.warn('Incidencias no cargadas'));
+    }
+
+    // SystemConfig SOLO ADMIN
+    if (canAccessView(currentUser, 'settings')) {
+      SystemConfigService.getSystemConfig()
+        .then(setSystemConfig)
+        .catch(() => console.warn('SystemConfig no cargado'));
+    }
+
+  }, [isLoggedIn, currentUser]);
 
   // Redirigir al que no tiene acceso a la vista actual
   useEffect(() => {
@@ -91,7 +120,8 @@ function App() {
     try {
       const response = await login({ email, password });
 
-      localStorage.setItem("auth", `${email}:${password}`);
+      // GUARDAR JWT
+      localStorage.setItem("token", response.token);
 
       const mappedUser: User = {
         email: response.email,
@@ -99,21 +129,23 @@ function App() {
         role: response.role.toLowerCase() as User['role'],
       };
 
+      localStorage.setItem("currentUser", JSON.stringify(mappedUser));
+
       setCurrentUser(mappedUser);
       setIsLoggedIn(true);
-
       setCurrentView(getDefaultViewByRole(mappedUser));
 
-    } catch (error) {
+    } catch {
       alert("Credenciales incorrectas");
     }
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("currentUser");
     setCurrentUser(null);
     setIsLoggedIn(false);
     setCurrentView('dashboard');
-    localStorage.removeItem('currentUser');
   };
 
   // Gestión de productos
@@ -203,20 +235,6 @@ function App() {
       alert('Error actualizando incidencia');
     }
   };
-
-  // Gestión de usuarios
-  // const handleAddAppUser = (userData: Omit<AppUser, 'id' | 'createdAt'>) => {
-  //   const newUser: AppUser = { ...userData, id: Date.now().toString(), createdAt: new Date().toISOString() };
-  //   setAppUsers([...appUsers, newUser]);
-  // };
-
-  // const handleEditAppUser = (id: string, userData: Omit<AppUser, 'id' | 'createdAt'>) => {
-  //   setAppUsers(appUsers.map(u => u.id === id ? { ...userData, id, createdAt: u.createdAt } : u));
-  // };
-
-  // const handleDeleteAppUser = (id: number) => {
-  //   setAppUsers(appUsers.filter(u => u.id !== id));
-  // };
 
   // Configuración del sistema
   const handleSaveConfig = async (config: SystemConfig) => {
