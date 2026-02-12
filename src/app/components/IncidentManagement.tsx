@@ -3,6 +3,7 @@ import { AlertTriangle, Plus, X, Clock, CheckCircle, XCircle } from 'lucide-reac
 import type { User } from '@/app/types/User';
 import type { Product } from '@/app/types/Product';
 import type { Incident } from '@/app/types/Incident';
+import { canCreateIncident, canResolveIncident } from '@/app/utils/permissions';
 
 interface IncidentManagementProps {
   products: Product[];
@@ -22,8 +23,8 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
     description: '',
   });
 
-  const canCreateIncident = user.role === 'operator' || user.role === 'manager' || user.role === 'admin';
-  const canResolveIncident = user.role === 'manager' || user.role === 'admin';
+  const canCreate = canCreateIncident(user);
+  const canResolve = canResolveIncident(user);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,7 +94,7 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
               : 'Gestione y resuelva incidencias del inventario'}
           </p>
         </div>
-        {canCreateIncident && (
+        {canCreate && (
           <button
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
@@ -220,7 +221,7 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
                       )}
                     </div>
                   </div>
-                  {canResolveIncident && incident.status === 'pendiente' && (
+                  {canResolve && incident.status === 'pendiente' && (
                     <div className="flex gap-2">
                       <button
                         onClick={() => onResolveIncident(incident.id, 'resuelto')}

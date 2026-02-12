@@ -9,7 +9,6 @@ interface SystemSettingsProps {
 }
 
 export function SystemSettings({ config, onSave }: SystemSettingsProps) {
-  // const [formData, setFormData] = useState<SystemConfig>(config);
   const [formData, setFormData] = useState<SystemConfig | null>(config);
   const [hasChanges, setHasChanges] = useState(false);
 

@@ -1,6 +1,8 @@
 import type { User } from '@/app/types/User';
 import type { View } from '@/app/types/View';
 
+
+// Permisos de VISTA / ROL
 export const canAccessView = (user: User, view: View): boolean => {
   switch (view) {
     // Dashboard

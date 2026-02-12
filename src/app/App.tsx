@@ -17,6 +17,7 @@ import { User } from '@/app/types/User';
 import { Product } from '@/app/types/Product';
 import { Movement } from '@/app/types/Movement';
 import { Incident } from '@/app/types/Incident';
+import { SystemConfig } from '@/app/types/SystemConfig';
 import { login } from '@/services/auth.service';
 import * as ProductService from '@/services/product.service';
 import * as MovementService from '@/services/movement.service';
@@ -26,16 +27,7 @@ import * as SystemConfigService from '@/services/systemConfig.service';
 import { canAccessView } from '@/app/utils/sidebar.permissions';
 
 import type { View } from '@/app/types/View';
-interface SystemConfig {
-  companyName: string;
-  lowStockThreshold: number;
-  currency: string;
-  autoApproveMovements: boolean;
-  requireIncidentApproval: boolean;
-  enableNotifications: boolean;
-  defaultLocation: string;
-  maxStockPerProduct: number;
-}
+import { canViewIncidents, canViewMovements, canViewProduct, canViewSystemSettings } from './utils/permissions';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -70,9 +62,7 @@ function App() {
     if (!isLoggedIn || !currentUser) return;
 
     // Productos
-    if (canAccessView(currentUser, 'inventory') ||
-      canAccessView(currentUser, 'consult-inventory') ||
-      canAccessView(currentUser, 'audit-inventory')) {
+    if (canViewProduct(currentUser)) {
 
       ProductService.getProducts()
         .then(setProducts)
@@ -80,10 +70,7 @@ function App() {
     }
 
     // Movimientos
-    if (canAccessView(currentUser, 'audit-movements') ||
-      canAccessView(currentUser, 'approve') ||
-      canAccessView(currentUser, 'register-entry') ||
-      canAccessView(currentUser, 'register-exit')) {
+    if (canViewMovements(currentUser)) {
 
       MovementService.getMovements()
         .then(setMovements)
@@ -91,8 +78,7 @@ function App() {
     }
 
     // Incidencias
-    if (canAccessView(currentUser, 'incidents') ||
-      canAccessView(currentUser, 'report-incident')) {
+    if (canViewIncidents(currentUser)) {
 
       IncidentService.getIncidents()
         .then(setIncidents)
@@ -100,7 +86,7 @@ function App() {
     }
 
     // SystemConfig SOLO ADMIN
-    if (canAccessView(currentUser, 'settings')) {
+    if (canViewSystemSettings(currentUser)) {
       SystemConfigService.getSystemConfig()
         .then(setSystemConfig)
         .catch(() => console.warn('SystemConfig no cargado'));

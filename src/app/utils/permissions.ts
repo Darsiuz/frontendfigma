@@ -1,38 +1,61 @@
-import { User } from '@/app/types/User';
+import { User as U} from '@/app/types/User';
 
-export const canCreateProduct = (user: User) =>
-  user.role === 'admin' || user.role === 'manager';
-
-export const canEditProduct = (user: User) =>
-  user.role === 'admin' || user.role === 'manager';
-
-export const canDeleteProduct = (user: User) =>
-  user.role === 'admin';
+export const ADMIN = (u:U) => u.role === 'admin';
+export const MANAGER = (u:U) => u.role === 'manager';
+export const OPERATOR = (u:U) => u.role === 'operator';
+export const AUDITOR = (u:U) => u.role === 'auditor';
 
 
+// Permisos de ACCION / DOMINIO
 
-export const canCreateMovement = (user: User) =>
-  user.role === 'admin' || user.role === 'manager' || user.role === 'operator';
-
-export const canApproveMovement = (user: User) =>
-  user.role === 'admin' || user.role === 'manager';
+export const canViewSystemSettings = (u: U) =>
+  ADMIN(u);
 
 
 
-export const canCreateIncident = (user: User) =>
-  user.role === 'admin' || user.role === 'manager' || user.role === 'operator';
+export const canCreateProduct = (u: U) =>
+  ADMIN(u) || MANAGER(u);
 
-export const canResolveIncident = (user: User) =>
-  user.role === 'admin' || user.role === 'manager';
+export const canEditProduct = (u: U) =>
+  ADMIN(u) || MANAGER(u);
 
-export const canViewReports = (user: User) =>
-  user.role === 'admin' || user.role === 'manager';
+export const canDeleteProduct = (u: U) =>
+  ADMIN(u);
 
-export const canManageUsers = (user: User) =>
-  user.role === 'admin';
+export const canViewProduct = (u: U) =>
+  ADMIN(u) || MANAGER(u) || OPERATOR(u) || AUDITOR(u);
 
 
 
-export const canViewDashboard = (user: User) =>
-  ['admin', 'manager', 'operator', 'viewer'].includes(user.role);
+export const canCreateMovement = (u: U) =>
+  ADMIN(u) || MANAGER(u) || OPERATOR(u);
+
+export const canApproveMovement = (u: U) =>
+  ADMIN(u) || MANAGER(u);
+
+export const canViewMovements = (u: U) =>
+  ADMIN(u) || MANAGER(u) || OPERATOR(u) || AUDITOR(u);
+
+
+
+export const canCreateIncident = (u: U) =>
+  ADMIN(u) || MANAGER(u) || OPERATOR(u);
+
+export const canResolveIncident = (u: U) =>
+  ADMIN(u) || MANAGER(u);
+
+export const canViewIncidents = (u: U) =>
+  ADMIN(u) || MANAGER(u) || OPERATOR(u) || AUDITOR(u);
+
+
+export const canViewReports = (u: U) =>
+  ADMIN(u) || MANAGER(u);
+
+export const canManageUsers = (u: U) =>
+  ADMIN(u);
+
+
+
+export const canViewDashboard = (u: U) =>
+  ADMIN(u) || MANAGER(u) || OPERATOR(u) || AUDITOR(u);
 
