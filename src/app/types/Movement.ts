@@ -1,5 +1,14 @@
-export type MovementType = 'entrada' | 'salida';
-export type MovementStatus = 'pendiente' | 'aprobado' | 'rechazado';
+export enum MovementStatus {
+  PENDIENTE = 'PENDIENTE',
+  APROBADO = 'APROBADO',
+  RECHAZADO = 'RECHAZADO',
+}
+
+export type MovementFilter = MovementStatus | 'all';
+
+export type MovementType =
+  | 'ENTRADA'
+  | 'SALIDA';
 
 export interface Movement {
     id: string;

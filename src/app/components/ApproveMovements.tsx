@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Clock, CheckCircle, XCircle, ArrowUpCircle, ArrowDownCircle, Filter } from 'lucide-react';
-import { Movement } from '@/app/types/Movement';
+import { Movement, MovementStatus, MovementFilter } from '@/app/types/Movement';
 
 interface ApproveMovementsProps {
   movements: Movement[];
@@ -9,7 +9,7 @@ interface ApproveMovementsProps {
 }
 
 export function ApproveMovements({ movements, onApprove, onReject }: ApproveMovementsProps) {
-  const [filter, setFilter] = useState('pendiente');
+  const [filter, setFilter] = useState<MovementFilter>('all'); // FALTA REVISAR SI SE DEBE INICIALIZAR EN PENDIENTE O EN ALL
 
   const filteredMovements = movements.filter(m => {
     if (filter === 'all') return true;
@@ -20,9 +20,9 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
-  const pendingCount = movements.filter(m => m.status === 'pendiente').length;
-  const approvedCount = movements.filter(m => m.status === 'aprobado').length;
-  const rejectedCount = movements.filter(m => m.status === 'rechazado').length;
+  const pendingCount = movements.filter(m => m.status === MovementStatus.PENDIENTE).length;
+  const approvedCount = movements.filter(m => m.status === MovementStatus.APROBADO).length;
+  const rejectedCount = movements.filter(m => m.status === MovementStatus.RECHAZADO).length;
 
   return (
     <div className="space-y-6">
@@ -36,8 +36,8 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
       <div className="bg-white rounded-lg shadow p-4">
         <div className="flex gap-2">
           <button
-            onClick={() => setFilter('pendiente')}
-            className={`px-4 py-2 rounded-lg transition-colors ${filter === 'pendiente'
+            onClick={() => setFilter(MovementStatus.PENDIENTE)}
+            className={`px-4 py-2 rounded-lg transition-colors ${filter === MovementStatus.PENDIENTE
                 ? 'bg-yellow-100 text-yellow-700'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
@@ -45,8 +45,8 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
             Pendientes ({pendingCount})
           </button>
           <button
-            onClick={() => setFilter('aprobado')}
-            className={`px-4 py-2 rounded-lg transition-colors ${filter === 'aprobado'
+            onClick={() => setFilter(MovementStatus.APROBADO)}
+            className={`px-4 py-2 rounded-lg transition-colors ${filter === MovementStatus.APROBADO
                 ? 'bg-green-100 text-green-700'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
@@ -54,8 +54,8 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
             Aprobados ({approvedCount})
           </button>
           <button
-            onClick={() => setFilter('rechazado')}
-            className={`px-4 py-2 rounded-lg transition-colors ${filter === 'rechazado'
+            onClick={() => setFilter(MovementStatus.RECHAZADO)}
+            className={`px-4 py-2 rounded-lg transition-colors ${filter === MovementStatus.RECHAZADO
                 ? 'bg-red-100 text-red-700'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
@@ -96,7 +96,7 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
           <div className="text-center py-12">
             <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">
-              {filter === 'pendiente'
+              {filter === MovementStatus.PENDIENTE
                 ? 'No hay movimientos pendientes de aprobación'
                 : 'No hay movimientos con este estado'}
             </p>
@@ -107,9 +107,9 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
               <div key={movement.id} className="p-6 hover:bg-gray-50 transition-colors">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
-                    <div className={`rounded-full p-3 ${movement.type === 'entrada' ? 'bg-green-100' : 'bg-red-100'
+                    <div className={`rounded-full p-3 ${movement.type === 'ENTRADA' ? 'bg-green-100' : 'bg-red-100'
                       }`}>
-                      {movement.type === 'entrada' ? (
+                      {movement.type === 'ENTRADA' ? (
                         <ArrowUpCircle className="w-6 h-6 text-green-600" />
                       ) : (
                         <ArrowDownCircle className="w-6 h-6 text-red-600" />
@@ -118,20 +118,20 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold text-gray-900">{movement.productName}</h3>
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${movement.type === 'entrada'
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${movement.type === 'ENTRADA'
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
                           }`}>
-                          {movement.type === 'entrada' ? 'Entrada' : 'Salida'}
+                          {movement.type === 'ENTRADA' ? 'Entrada' : 'Salida'}
                         </span>
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${movement.status === 'pendiente'
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${movement.status === MovementStatus.PENDIENTE
                             ? 'bg-yellow-100 text-yellow-800'
-                            : movement.status === 'aprobado'
+                            : movement.status === MovementStatus.APROBADO
                               ? 'bg-green-100 text-green-800'
                               : 'bg-red-100 text-red-800'
                           }`}>
-                          {movement.status === 'pendiente' ? 'Pendiente' :
-                            movement.status === 'aprobado' ? 'Aprobado' : 'Rechazado'}
+                          {movement.status === MovementStatus.PENDIENTE ? 'Pendiente' :
+                            movement.status === MovementStatus.APROBADO ? 'Aprobado' : 'Rechazado'}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 mb-3">{movement.reason}</p>
@@ -147,9 +147,9 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
                           })}
                         </span>
                         <span>Por: {movement.user}</span>
-                        <span className={`font-medium ${movement.type === 'entrada' ? 'text-green-600' : 'text-red-600'
+                        <span className={`font-medium ${movement.type === 'ENTRADA' ? 'text-green-600' : 'text-red-600'
                           }`}>
-                          {movement.type === 'entrada' ? '+' : '-'}{movement.quantity} unidades
+                          {movement.type === 'ENTRADA' ? '+' : '-'}{movement.quantity} unidades
                         </span>
                       </div>
                       {movement.reviewedBy && (
@@ -159,7 +159,7 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
                       )}
                     </div>
                   </div>
-                  {movement.status === 'pendiente' && (
+                  {movement.status === MovementStatus.PENDIENTE && (
                     <div className="flex gap-2">
                       <button
                         onClick={() => onApprove(movement.id)}

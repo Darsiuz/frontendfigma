@@ -52,8 +52,8 @@ export function DashboardView({ products, movements }: DashboardViewProps) {
 
     return {
       date: date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
-      entradas: dayMovements.filter(m => m.type === 'entrada').reduce((sum, m) => sum + m.quantity, 0),
-      salidas: dayMovements.filter(m => m.type === 'salida').reduce((sum, m) => sum + m.quantity, 0)
+      entradas: dayMovements.filter(m => m.type === 'ENTRADA').reduce((sum, m) => sum + m.quantity, 0),
+      salidas: dayMovements.filter(m => m.type === 'SALIDA').reduce((sum, m) => sum + m.quantity, 0)
     };
   });
 
@@ -194,9 +194,9 @@ export function DashboardView({ products, movements }: DashboardViewProps) {
               recentMovements.map(movement => (
                 <div key={movement.id} className="flex items-start gap-3 p-3 border-b border-gray-100 last:border-b-0">
                   <div className={`rounded-full p-2 ${
-                    movement.type === 'entrada' ? 'bg-green-100' : 'bg-red-100'
+                    movement.type === 'ENTRADA' ? 'bg-green-100' : 'bg-red-100'
                   }`}>
-                    {movement.type === 'entrada' ? (
+                    {movement.type === 'ENTRADA' ? (
                       <ArrowUpCircle className="w-4 h-4 text-green-600" />
                     ) : (
                       <ArrowDownCircle className="w-4 h-4 text-red-600" />
@@ -210,9 +210,9 @@ export function DashboardView({ products, movements }: DashboardViewProps) {
                     </p>
                   </div>
                   <p className={`font-semibold ${
-                    movement.type === 'entrada' ? 'text-green-600' : 'text-red-600'
+                    movement.type === 'ENTRADA' ? 'text-green-600' : 'text-red-600'
                   }`}>
-                    {movement.type === 'entrada' ? '+' : '-'}{movement.quantity}
+                    {movement.type === 'ENTRADA' ? '+' : '-'}{movement.quantity}
                   </p>
                 </div>
               ))

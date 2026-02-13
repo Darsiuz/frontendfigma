@@ -15,7 +15,7 @@ import { getViewLabel } from '@/app/utils/views.helpers';
 
 import { User } from '@/app/types/User';
 import { Product } from '@/app/types/Product';
-import { Movement } from '@/app/types/Movement';
+import { Movement, MovementStatus } from '@/app/types/Movement';
 import { Incident } from '@/app/types/Incident';
 import { SystemConfig } from '@/app/types/SystemConfig';
 import { login } from '@/services/auth.service';
@@ -175,9 +175,28 @@ function App() {
   ) => {
     try {
       const newMovement = await MovementService.createMovement(movementData);
-      setMovements([...movements, newMovement]);
-    } catch {
-      alert('Error registrando movimiento');
+
+      // Agregar movimiento
+      setMovements(prev => [...prev, newMovement]);
+
+      // Si fue auto aprobado, actualizar stock en memoria
+      if (newMovement.status === MovementStatus.APROBADO) {
+        setProducts(prevProducts =>
+          prevProducts.map(p => {
+            if (p.id === newMovement.productId) {
+              if (newMovement.type === 'ENTRADA') {
+                return { ...p, quantity: p.quantity + newMovement.quantity };
+              } else {
+                return { ...p, quantity: p.quantity - newMovement.quantity };
+              }
+            }
+            return p;
+          })
+        );
+      }
+
+    } catch (error: any) {
+      alert(error?.response?.data?.message || 'Error registrando movimiento');
     }
   };
 
@@ -283,19 +302,19 @@ function App() {
             </div>
           ) : (
             <>
-              {currentView === 'dashboard' && <DashboardView products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+              {currentView === 'dashboard' && <DashboardView products={products} movements={movements.filter(m => m.status === MovementStatus.APROBADO)} />}
 
               {/* Admin */}
               {currentView === 'inventory' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}
               {currentView === 'users' && <UserManagement />}
               {currentView === 'settings' && systemConfig && (<SystemSettings config={systemConfig} onSave={handleSaveConfig} />)}
-              {currentView === 'reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+              {currentView === 'reports' && <Reports products={products} movements={movements.filter(m => m.status === MovementStatus.APROBADO)} />}
 
               {/* Manager */}
               {currentView === 'supervise' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}
               {currentView === 'approve' && <ApproveMovements movements={movements} onApprove={handleApproveMovement} onReject={handleRejectMovement} />}
               {currentView === 'incidents' && <IncidentManagement products={products} incidents={incidents} onAddIncident={handleAddIncident} onResolveIncident={handleResolveIncident} user={currentUser} />}
-              {currentView === 'manager-reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+              {currentView === 'manager-reports' && <Reports products={products} movements={movements.filter(m => m.status === MovementStatus.APROBADO)} />}
 
               {/* Operator */}
               {currentView === 'register-entry' && <StockMovements products={products} movements={movements} onAddMovement={handleAddMovement} user={currentUser} />}
@@ -305,9 +324,9 @@ function App() {
 
               {/* Auditor */}
               {currentView === 'audit-inventory' && <InventoryManagement products={products} onEdit={(p) => { }} onDelete={() => { }} onAdd={() => { }} user={currentUser} />}
-              {currentView === 'audit-movements' && <StockMovements products={products} movements={movements.filter(m => m.status === 'aprobado')} onAddMovement={handleAddMovement} user={currentUser} />}
-              {currentView === 'audit-reports' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
-              {currentView === 'export-audit' && <Reports products={products} movements={movements.filter(m => m.status === 'aprobado')} />}
+              {currentView === 'audit-movements' && <StockMovements products={products} movements={movements.filter(m => m.status === MovementStatus.APROBADO)} onAddMovement={handleAddMovement} user={currentUser} />}
+              {currentView === 'audit-reports' && <Reports products={products} movements={movements.filter(m => m.status === MovementStatus.APROBADO)} />}
+              {currentView === 'export-audit' && <Reports products={products} movements={movements.filter(m => m.status === MovementStatus.APROBADO)} />}
             </>
           )}
         </main>

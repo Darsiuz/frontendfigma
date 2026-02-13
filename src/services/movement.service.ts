@@ -5,15 +5,18 @@ const mapStatus = (status?: string): MovementStatus => {
   switch (status?.toUpperCase()) {
     case 'APPROVED':
     case 'APROBADO':
-      return 'aprobado';
+      return MovementStatus.APROBADO;
+
     case 'PENDING':
     case 'PENDIENTE':
-      return 'pendiente';
+      return MovementStatus.PENDIENTE;
+
     case 'REJECTED':
     case 'RECHAZADO':
-      return 'rechazado';
+      return MovementStatus.RECHAZADO;
+
     default:
-      return 'pendiente';
+      return MovementStatus.PENDIENTE;
   }
 };
 
