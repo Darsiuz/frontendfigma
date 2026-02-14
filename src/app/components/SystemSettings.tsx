@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Settings, Save, RotateCcw } from 'lucide-react';
 import { SystemConfig } from '@/app/types/SystemConfig';
-import toast from 'react-hot-toast';
+import { toast } from "sonner";
 
 
 interface SystemSettingsProps {

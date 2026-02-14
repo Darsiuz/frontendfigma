@@ -28,7 +28,7 @@ import { canAccessView } from '@/app/utils/sidebar.permissions';
 
 import type { View } from '@/app/types/View';
 import { canViewIncidents, canViewMovements, canViewProduct, canViewSystemSettings } from './utils/permissions';
-import toast from 'react-hot-toast';
+import { toast } from "sonner";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -174,31 +174,37 @@ function App() {
   const handleAddMovement = async (
     movementData: Omit<Movement, 'id' | 'date' | 'productName' | 'user' | 'status'>
   ) => {
-    try {
-      const newMovement = await MovementService.createMovement(movementData);
+    const promise = MovementService.createMovement(movementData);
 
-      // Agregar movimiento
+    toast.promise(promise, {
+      loading: "Registrando movimiento...",
+      success: "Movimiento registrado correctamente",
+      error: (err) =>
+        err?.response?.data?.message || "Error registrando movimiento",
+    });
+
+    try {
+      const newMovement: Movement = await promise;
+
       setMovements(prev => [...prev, newMovement]);
 
-      // Si fue auto aprobado, actualizar stock en memoria
       if (newMovement.status === MovementStatus.APROBADO) {
-        setProducts(prevProducts =>
-          prevProducts.map(p => {
-            if (p.id === newMovement.productId) {
-              if (newMovement.type === MovementType.ENTRADA) {
-                return { ...p, quantity: p.quantity + newMovement.quantity };
-              } else {
-                return { ...p, quantity: p.quantity - newMovement.quantity };
+        setProducts(prev =>
+          prev.map(p =>
+            p.id === newMovement.productId
+              ? {
+                ...p,
+                quantity:
+                  newMovement.type === MovementType.ENTRADA
+                    ? p.quantity + newMovement.quantity
+                    : p.quantity - newMovement.quantity,
               }
-            }
-            return p;
-          })
+              : p
+          )
         );
       }
 
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Error registrando movimiento');
-    }
+    } catch (error: any) { }
   };
 
   const handleApproveMovement = async (id: string) => {

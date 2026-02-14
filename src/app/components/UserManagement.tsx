@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getUsers, createUser, updateUser, deleteUser, disableUser } from "@/services/user.service";
 import { Users, Plus, Edit, Trash2, X, Shield, Mail, User as UserIcon } from 'lucide-react';
 import type { AppUser, ApiUser } from '@/app/types/User';
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export function UserManagement() {
   const [users, setUsers] = useState<AppUser[]>([]);
