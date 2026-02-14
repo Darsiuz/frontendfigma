@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getUsers, createUser, updateUser, deleteUser, disableUser } from "@/services/user.service";
 import { Users, Plus, Edit, Trash2, X, Shield, Mail, User as UserIcon } from 'lucide-react';
 import type { AppUser, ApiUser } from '@/app/types/User';
+import toast from "react-hot-toast";
 
 export function UserManagement() {
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -71,7 +72,7 @@ export function UserManagement() {
       setUsers(users.filter(u => u.id !== id));
     } catch (e) {
       console.error("Error eliminando usuario", e);
-      alert("Error al eliminar usuario");
+      toast.error("Error eliminando usuario");
     }
   };
 
@@ -106,7 +107,7 @@ export function UserManagement() {
 
     } catch (e) {
       console.error("Error guardando usuario", e);
-      alert("Error al guardar usuario");
+      toast.error("Error al guardar usuario");
     }
   };
 

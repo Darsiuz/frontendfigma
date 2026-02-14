@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Settings, Save, RotateCcw } from 'lucide-react';
 import { SystemConfig } from '@/app/types/SystemConfig';
+import toast from 'react-hot-toast';
 
 
 interface SystemSettingsProps {
@@ -223,7 +224,10 @@ export function SystemSettings({ config, onSave }: SystemSettingsProps) {
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={handleReset}
+            onClick={() => {
+              handleReset();
+              toast('Cambios restablecidos', { icon: '🔄' });
+            }}
             disabled={!hasChanges}
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >

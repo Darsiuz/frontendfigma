@@ -28,6 +28,7 @@ import { canAccessView } from '@/app/utils/sidebar.permissions';
 
 import type { View } from '@/app/types/View';
 import { canViewIncidents, canViewMovements, canViewProduct, canViewSystemSettings } from './utils/permissions';
+import toast from 'react-hot-toast';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -122,7 +123,7 @@ function App() {
       setCurrentView(getDefaultViewByRole(mappedUser));
 
     } catch {
-      alert("Credenciales incorrectas");
+      toast.error('Credenciales incorrectas');
     }
   };
 
@@ -139,8 +140,8 @@ function App() {
     try {
       const newProduct = await ProductService.createProduct(productData);
       setProducts([...products, newProduct]);
-    } catch {
-      alert('Error creando producto');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Error creando producto');
     }
   };
 
@@ -155,8 +156,8 @@ function App() {
 
       setProducts(products.map(p => (p.id === updated.id ? updated : p)));
       setEditingProduct(null);
-    } catch {
-      alert('Error actualizando producto');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Error actualizando producto');
     }
   };
 
@@ -164,8 +165,8 @@ function App() {
     try {
       await ProductService.deleteProduct(id);
       setProducts(products.filter(p => p.id !== id));
-    } catch {
-      alert('Error eliminando producto');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Error eliminando producto');
     }
   };
 
@@ -196,7 +197,7 @@ function App() {
       }
 
     } catch (error: any) {
-      alert(error?.response?.data?.message || 'Error registrando movimiento');
+      toast.error(error?.response?.data?.message || 'Error registrando movimiento');
     }
   };
 
@@ -204,8 +205,8 @@ function App() {
     try {
       const updated = await MovementService.approveMovement(id);
       setMovements(movements.map(m => (m.id === id ? updated : m)));
-    } catch {
-      alert('Error aprobando movimiento');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Error aprobando movimiento');
     }
   };
 
@@ -213,8 +214,8 @@ function App() {
     try {
       const updated = await MovementService.rejectMovement(id);
       setMovements(movements.map(m => (m.id === id ? updated : m)));
-    } catch {
-      alert('Error rechazando movimiento');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Error rechazando movimiento');
     }
   };
 
@@ -223,8 +224,8 @@ function App() {
     try {
       const newIncident = await IncidentService.createIncident(incidentData);
       setIncidents([...incidents, newIncident]);
-    } catch {
-      alert('Error registrando incidencia');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Error registrando incidencia');
     }
   };
 
@@ -236,8 +237,8 @@ function App() {
           : await IncidentService.rejectIncident(id);
 
       setIncidents(incidents.map(i => (i.id === id ? updated : i)));
-    } catch {
-      alert('Error actualizando incidencia');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Error actualizando incidencia');
     }
   };
 
@@ -246,8 +247,9 @@ function App() {
     try {
       const updated = await SystemConfigService.updateSystemConfig(config);
       setSystemConfig(updated);
-      alert('Configuracion guardada correctamente');
-    } catch {
+      toast.success('Configuracion guardada correctamente');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Error guardando configuracion');
       alert('Error guardando configuracion');
     }
   };
