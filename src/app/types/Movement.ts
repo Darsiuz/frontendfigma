@@ -6,9 +6,10 @@ export enum MovementStatus {
 
 export type MovementFilter = MovementStatus | 'all';
 
-export type MovementType =
-  | 'ENTRADA'
-  | 'SALIDA';
+export enum MovementType {
+  ENTRADA = 'ENTRADA',
+  SALIDA = 'SALIDA',
+}
 
 export interface Movement {
     id: string;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, ArrowUpCircle, ArrowDownCircle, X, Calendar, Filter, Download, Activity } from 'lucide-react';
 import { Product } from '@/app/types/Product';
-import { Movement, MovementStatus } from '@/app/types/Movement';
+import { Movement, MovementStatus, MovementType } from '@/app/types/Movement';
 import { User } from '@/app/types/User';
 import { canCreateMovement } from '@/app/utils/permissions';
 
@@ -16,7 +16,7 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     productId: 0,
-    type: 'ENTRADA' as 'ENTRADA' | 'SALIDA',
+    type: MovementType.ENTRADA as MovementType.ENTRADA | MovementType.SALIDA,
     quantity: 0,
     reason: '',
   });
@@ -34,7 +34,7 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
       onAddMovement(formData);
       setFormData({
         productId: 0,
-        type: 'ENTRADA',
+        type: MovementType.ENTRADA,
         quantity: 0,
         reason: '',
       });
@@ -72,11 +72,11 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
   );
 
   const totalEntradas = filteredMovements
-    .filter(m => m.type === 'ENTRADA')
+    .filter(m => m.type === MovementType.ENTRADA)
     .reduce((sum, m) => sum + m.quantity, 0);
 
   const totalSalidas = filteredMovements
-    .filter(m => m.type === 'SALIDA')
+    .filter(m => m.type === MovementType.SALIDA)
     .reduce((sum, m) => sum + m.quantity, 0);
 
   const exportToCSV = () => {
@@ -84,7 +84,7 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
     const rows = sortedMovements.map(m => [
       new Date(m.date).toLocaleDateString('es-ES'),
       m.productName,
-      m.type === 'ENTRADA' ? 'ENTRADA' : 'SALIDA',
+      m.type === MovementType.ENTRADA ? 'Entrada' : 'Salida',
       m.quantity,
       m.reason,
       m.user
@@ -148,8 +148,8 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Todos los tipos</option>
-            <option value="ENTRADA">Entradas</option>
-            <option value="SALIDA">Salidas</option>
+            <option value={MovementType.ENTRADA}>Entradas</option>
+            <option value={MovementType.SALIDA}>Salidas</option>
           </select>
           <select
             value={dateFilter}
@@ -202,9 +202,9 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-1">
                     <div className={`rounded-full p-2 mt-1 ${
-                      movement.type === 'ENTRADA' ? 'bg-green-100' : 'bg-red-100'
+                      movement.type === MovementType.ENTRADA ? 'bg-green-100' : 'bg-red-100'
                     }`}>
-                      {movement.type === 'ENTRADA' ? (
+                      {movement.type === MovementType.ENTRADA ? (
                         <ArrowUpCircle className="w-5 h-5 text-green-600" />
                       ) : (
                         <ArrowDownCircle className="w-5 h-5 text-red-600" />
@@ -214,11 +214,11 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-medium text-gray-900">{movement.productName}</h4>
                         <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                          movement.type === 'ENTRADA' 
+                          movement.type === MovementType.ENTRADA 
                             ? 'bg-green-100 text-green-800' 
                             : 'bg-red-100 text-red-800'
                         }`}>
-                          {movement.type === 'ENTRADA' ? 'Entrada' : 'Salida'}
+                          {movement.type === MovementType.ENTRADA ? 'Entrada' : 'Salida'}
                         </span>
                         {movement.status && (
                           <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
@@ -256,9 +256,9 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
                   </div>
                   <div className="text-right">
                     <p className={`text-xl font-bold ${
-                      movement.type === 'ENTRADA' ? 'text-green-600' : 'text-red-600'
+                      movement.type === MovementType.ENTRADA ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      {movement.type === 'ENTRADA' ? '+' : '-'}{movement.quantity}
+                      {movement.type === MovementType.ENTRADA ? '+' : '-'}{movement.quantity}
                     </p>
                     <p className="text-xs text-gray-500">unidades</p>
                   </div>
@@ -310,9 +310,9 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, type: 'ENTRADA' })}
+                    onClick={() => setFormData({ ...formData, type: MovementType.ENTRADA })}
                     className={`flex items-center justify-center gap-2 px-4 py-3 border rounded-lg transition-all ${
-                      formData.type === 'ENTRADA'
+                      formData.type === MovementType.ENTRADA
                         ? 'border-green-600 bg-green-50 text-green-700'
                         : 'border-gray-300 text-gray-700 hover:bg-gray-50'
                     }`}
@@ -322,9 +322,9 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
                   </button>
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, type: 'SALIDA' })}
+                    onClick={() => setFormData({ ...formData, type: MovementType.SALIDA })}
                     className={`flex items-center justify-center gap-2 px-4 py-3 border rounded-lg transition-all ${
-                      formData.type === 'SALIDA'
+                      formData.type === MovementType.SALIDA
                         ? 'border-red-600 bg-red-50 text-red-700'
                         : 'border-gray-300 text-gray-700 hover:bg-gray-50'
                     }`}

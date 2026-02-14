@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Download, FileText, TrendingUp, Package, DollarSign, Calendar } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend, PieChart, Pie, Cell } from 'recharts';
 import type { Product } from '@/app/types/Product';
-import type { Movement } from '@/app/types/Movement';
+import { MovementType, type Movement } from '@/app/types/Movement';
 
 interface ReportsProps {
   products: Product[];
@@ -43,7 +43,7 @@ export function Reports({ products, movements }: ReportsProps) {
     const existing = acc.find(item => item.month === monthYear);
     
     if (existing) {
-      if (mov.type === 'ENTRADA') {
+      if (mov.type === MovementType.ENTRADA) {
         existing.entradas += mov.quantity;
       } else {
         existing.salidas += mov.quantity;
@@ -51,8 +51,8 @@ export function Reports({ products, movements }: ReportsProps) {
     } else {
       acc.push({
         month: monthYear,
-        entradas: mov.type === 'ENTRADA' ? mov.quantity : 0,
-        salidas: mov.type === 'SALIDA' ? mov.quantity : 0
+        entradas: mov.type === MovementType.ENTRADA ? mov.quantity : 0,
+        salidas: mov.type === MovementType.SALIDA ? mov.quantity : 0
       });
     }
     return acc;
@@ -69,7 +69,7 @@ export function Reports({ products, movements }: ReportsProps) {
       };
     }
     acc[mov.productId].totalMovements += mov.quantity;
-    if (mov.type === 'ENTRADA') {
+    if (mov.type === MovementType.ENTRADA) {
       acc[mov.productId].entradas += mov.quantity;
     } else {
       acc[mov.productId].salidas += mov.quantity;
@@ -117,7 +117,7 @@ export function Reports({ products, movements }: ReportsProps) {
         ...movements.map(m => [
           new Date(m.date).toLocaleDateString('es-ES'),
           `"${m.productName}"`,
-          m.type === 'ENTRADA' ? 'ENTRADA' : 'SALIDA',
+          m.type === MovementType.ENTRADA ? 'ENTRADA' : 'SALIDA',
           m.quantity,
           `"${m.reason}"`,
           `"${m.user}"`

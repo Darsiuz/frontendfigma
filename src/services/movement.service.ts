@@ -1,24 +1,8 @@
 import api from '@/services/api';
 import { Movement, MovementStatus } from '@/app/types/Movement';
 
-const mapStatus = (status?: string): MovementStatus => {
-  switch (status?.toUpperCase()) {
-    case 'APPROVED':
-    case 'APROBADO':
-      return MovementStatus.APROBADO;
-
-    case 'PENDING':
-    case 'PENDIENTE':
-      return MovementStatus.PENDIENTE;
-
-    case 'REJECTED':
-    case 'RECHAZADO':
-      return MovementStatus.RECHAZADO;
-
-    default:
-      return MovementStatus.PENDIENTE;
-  }
-};
+const mapStatus = (status?: string): MovementStatus =>
+  status?.toUpperCase() as MovementStatus ?? MovementStatus.PENDIENTE;
 
 const mapMovement = (m: any): Movement => ({
   ...m,

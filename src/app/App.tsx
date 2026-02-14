@@ -15,7 +15,7 @@ import { getViewLabel } from '@/app/utils/views.helpers';
 
 import { User } from '@/app/types/User';
 import { Product } from '@/app/types/Product';
-import { Movement, MovementStatus } from '@/app/types/Movement';
+import { Movement, MovementStatus, MovementType } from '@/app/types/Movement';
 import { Incident } from '@/app/types/Incident';
 import { SystemConfig } from '@/app/types/SystemConfig';
 import { login } from '@/services/auth.service';
@@ -184,7 +184,7 @@ function App() {
         setProducts(prevProducts =>
           prevProducts.map(p => {
             if (p.id === newMovement.productId) {
-              if (newMovement.type === 'ENTRADA') {
+              if (newMovement.type === MovementType.ENTRADA) {
                 return { ...p, quantity: p.quantity + newMovement.quantity };
               } else {
                 return { ...p, quantity: p.quantity - newMovement.quantity };

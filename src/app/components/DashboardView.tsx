@@ -2,7 +2,7 @@ import { Package, TrendingUp, AlertTriangle, Activity, DollarSign, ArrowUpCircle
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line } from 'recharts';
 
 import type { Product } from '@/app/types/Product';
-import type { Movement } from '@/app/types/Movement';
+import { MovementStatus, MovementType, type Movement } from '@/app/types/Movement';
 
 interface DashboardViewProps {
   products: Product[];
@@ -52,8 +52,8 @@ export function DashboardView({ products, movements }: DashboardViewProps) {
 
     return {
       date: date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
-      entradas: dayMovements.filter(m => m.type === 'ENTRADA').reduce((sum, m) => sum + m.quantity, 0),
-      salidas: dayMovements.filter(m => m.type === 'SALIDA').reduce((sum, m) => sum + m.quantity, 0)
+      entradas: dayMovements.filter(m => m.type === MovementType.ENTRADA).reduce((sum, m) => sum + m.quantity, 0),
+      salidas: dayMovements.filter(m => m.type === MovementType.SALIDA).reduce((sum, m) => sum + m.quantity, 0)
     };
   });
 
@@ -194,9 +194,9 @@ export function DashboardView({ products, movements }: DashboardViewProps) {
               recentMovements.map(movement => (
                 <div key={movement.id} className="flex items-start gap-3 p-3 border-b border-gray-100 last:border-b-0">
                   <div className={`rounded-full p-2 ${
-                    movement.type === 'ENTRADA' ? 'bg-green-100' : 'bg-red-100'
+                    movement.type === MovementType.ENTRADA ? 'bg-green-100' : 'bg-red-100'
                   }`}>
-                    {movement.type === 'ENTRADA' ? (
+                    {movement.type === MovementType.ENTRADA ? (
                       <ArrowUpCircle className="w-4 h-4 text-green-600" />
                     ) : (
                       <ArrowDownCircle className="w-4 h-4 text-red-600" />
@@ -210,9 +210,9 @@ export function DashboardView({ products, movements }: DashboardViewProps) {
                     </p>
                   </div>
                   <p className={`font-semibold ${
-                    movement.type === 'ENTRADA' ? 'text-green-600' : 'text-red-600'
+                    movement.type === MovementType.ENTRADA ? 'text-green-600' : 'text-red-600'
                   }`}>
-                    {movement.type === 'ENTRADA' ? '+' : '-'}{movement.quantity}
+                    {movement.type === MovementType.ENTRADA ? '+' : '-'}{movement.quantity}
                   </p>
                 </div>
               ))

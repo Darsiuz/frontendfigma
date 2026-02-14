@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Clock, CheckCircle, XCircle, ArrowUpCircle, ArrowDownCircle, Filter } from 'lucide-react';
-import { Movement, MovementStatus, MovementFilter } from '@/app/types/Movement';
+import { Movement, MovementStatus, MovementFilter, MovementType } from '@/app/types/Movement';
 
 interface ApproveMovementsProps {
   movements: Movement[];
@@ -107,9 +107,9 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
               <div key={movement.id} className="p-6 hover:bg-gray-50 transition-colors">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
-                    <div className={`rounded-full p-3 ${movement.type === 'ENTRADA' ? 'bg-green-100' : 'bg-red-100'
+                    <div className={`rounded-full p-3 ${movement.type === MovementType.ENTRADA ? 'bg-green-100' : 'bg-red-100'
                       }`}>
-                      {movement.type === 'ENTRADA' ? (
+                      {movement.type === MovementType.ENTRADA ? (
                         <ArrowUpCircle className="w-6 h-6 text-green-600" />
                       ) : (
                         <ArrowDownCircle className="w-6 h-6 text-red-600" />
@@ -118,11 +118,11 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold text-gray-900">{movement.productName}</h3>
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${movement.type === 'ENTRADA'
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${movement.type === MovementType.ENTRADA
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
                           }`}>
-                          {movement.type === 'ENTRADA' ? 'Entrada' : 'Salida'}
+                          {movement.type === MovementType.ENTRADA ? 'Entrada' : 'Salida'}
                         </span>
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${movement.status === MovementStatus.PENDIENTE
                             ? 'bg-yellow-100 text-yellow-800'
@@ -147,9 +147,9 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
                           })}
                         </span>
                         <span>Por: {movement.user}</span>
-                        <span className={`font-medium ${movement.type === 'ENTRADA' ? 'text-green-600' : 'text-red-600'
+                        <span className={`font-medium ${movement.type === MovementType.ENTRADA ? 'text-green-600' : 'text-red-600'
                           }`}>
-                          {movement.type === 'ENTRADA' ? '+' : '-'}{movement.quantity} unidades
+                          {movement.type === MovementType.ENTRADA ? '+' : '-'}{movement.quantity} unidades
                         </span>
                       </div>
                       {movement.reviewedBy && (
