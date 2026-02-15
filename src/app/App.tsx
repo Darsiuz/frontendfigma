@@ -323,8 +323,8 @@ function App() {
               {/* Admin */}
               {currentView === 'inventory' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}
               {currentView === 'users' && <UserManagement />}
-              {currentView === 'settings' && systemConfig && (<SystemSettings config={systemConfig} onSave={handleSaveConfig} />)}
               {currentView === 'reports' && <Reports products={products} movements={movements.filter(m => m.status === MovementStatus.APROBADO)} />}
+              {currentView === 'settings' && systemConfig && (<SystemSettings config={systemConfig} onSave={handleSaveConfig} />)}
 
               {/* Manager */}
               {currentView === 'supervise' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}
@@ -333,8 +333,7 @@ function App() {
               {currentView === 'manager-reports' && <Reports products={products} movements={movements.filter(m => m.status === MovementStatus.APROBADO)} />}
 
               {/* Operator */}
-              {currentView === 'register-entry' && <StockMovements products={products} movements={movements} onAddMovement={handleAddMovement} user={currentUser} />}
-              {currentView === 'register-exit' && <StockMovements products={products} movements={movements} onAddMovement={handleAddMovement} user={currentUser} />}
+              {currentView === 'register-movements' && <StockMovements products={products} movements={movements} onAddMovement={handleAddMovement} user={currentUser} />}
               {currentView === 'consult-inventory' && <InventoryManagement products={products} onEdit={(p) => { }} onDelete={() => { }} onAdd={() => { }} user={currentUser} />}
               {currentView === 'report-incident' && <IncidentManagement products={products} incidents={incidents} onAddIncident={handleAddIncident} onResolveIncident={handleResolveIncident} user={currentUser} />}
 

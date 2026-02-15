@@ -1,3 +1,4 @@
+
 export type View =
   | 'dashboard'
   | 'inventory'
@@ -8,11 +9,18 @@ export type View =
   | 'approve'
   | 'incidents'
   | 'manager-reports'
-  | 'register-entry'
-  | 'register-exit'
+  | 'register-movements'
   | 'consult-inventory'
   | 'report-incident'
   | 'audit-inventory'
   | 'audit-movements'
   | 'audit-reports'
   | 'export-audit';
+
+
+  export interface ViewConfig {
+  id: View;
+  label: string;
+  icon: any;
+  badge?: number;
+}

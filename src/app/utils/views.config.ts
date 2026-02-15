@@ -1,22 +1,7 @@
-import type { View } from '@/app/types/View';
-import {
-  LayoutDashboard,
-  Package,
-  TrendingUp,
-  Users,
-  FileText,
-  Settings,
-  AlertTriangle,
-  CheckCircle
-} from 'lucide-react';
+import { ViewConfig } from '@/app/types/View';
+import { LayoutDashboard, Package, TrendingUp, Users, FileText, Settings, AlertTriangle, CheckCircle } from 'lucide-react';
 
-export interface ViewConfig {
-  id: View;
-  label: string;
-  icon: any;
-  badge?: number;
-}
-
+// ACA SE CAMBIA EL ORDEN DE LOS ITEMS EN EL SIDEBAR, ASI COMO LOS ICONOS Y LOS LABELS
 export const VIEWS_CONFIG: ViewConfig[] = [
   // Dashboard - Todos
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -24,8 +9,8 @@ export const VIEWS_CONFIG: ViewConfig[] = [
   // Admin - 5 funcionalidades
   { id: 'inventory', label: 'Gestionar Inventario', icon: Package },
   { id: 'users', label: 'Gestionar Usuarios', icon: Users },
-  { id: 'settings', label: 'Configuracion Sistema', icon: Settings },
   { id: 'reports', label: 'Reportes Generales', icon: FileText },
+  { id: 'settings', label: 'Configuracion Sistema', icon: Settings },
 
   // Manager - 4 funcionalidades
   { id: 'supervise', label: 'Supervisar Inventario', icon: Package },
@@ -34,9 +19,8 @@ export const VIEWS_CONFIG: ViewConfig[] = [
   { id: 'manager-reports', label: 'Reportes de Inventario', icon: FileText },
 
   // Operador - 4 funcionalidades
-  { id: 'register-entry', label: 'Registrar Entradas', icon: TrendingUp },
-  { id: 'register-exit', label: 'Registrar Salidas', icon: TrendingUp },
   { id: 'consult-inventory', label: 'Consultar Inventario', icon: Package },
+  { id: 'register-movements', label: 'Registrar Movimientos', icon: TrendingUp },
   { id: 'report-incident', label: 'Registrar Incidencias', icon: AlertTriangle },
 
   // Auditor - 4 funcionalidades

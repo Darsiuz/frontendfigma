@@ -2,7 +2,7 @@ import type { User } from '@/app/types/User';
 import type { View } from '@/app/types/View';
 
 
-// Permisos de VISTA / ROL
+// ACA SE DEFINE QUIEN PUEDE VER CADA ITEM DEL SIDEBAR, ESTO SE HACE EN BASE AL ROL DEL USUARIO
 export const canAccessView = (user: User, view: View): boolean => {
   switch (view) {
     // Dashboard
@@ -29,8 +29,7 @@ export const canAccessView = (user: User, view: View): boolean => {
       return user.role === 'manager';
 
     // Operator
-    case 'register-entry':
-    case 'register-exit':
+    case 'register-movements':
     case 'consult-inventory':
     case 'report-incident':
       return user.role === 'operator';
