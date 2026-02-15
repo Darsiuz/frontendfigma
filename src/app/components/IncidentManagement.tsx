@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { AlertTriangle, Plus, X, Clock, CheckCircle, XCircle } from 'lucide-react';
 import type { User } from '@/app/types/User';
 import type { Product } from '@/app/types/Product';
-import type { Incident } from '@/app/types/Incident';
+import { IncidentStatus, type Incident } from '@/app/types/Incident';
 import { canCreateIncident, canResolveIncident } from '@/app/utils/permissions';
 
 interface IncidentManagementProps {
   products: Product[];
   incidents: Incident[];
   onAddIncident: (incident: Omit<Incident, 'id' | 'reportedAt' | 'reportedBy' | 'status' | 'productName'>) => void;
-  onResolveIncident: (id: string, status: 'resuelto' | 'rechazado') => void;
+  onResolveIncident: (id: string, status: IncidentStatus) => void;
   user: User;
 }
 
@@ -73,9 +73,9 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
 
   const getStatusBadgeColor = (status: string) => {
     const colors: { [key: string]: string } = {
-      pendiente: 'bg-yellow-100 text-yellow-800',
-      resuelto: 'bg-green-100 text-green-800',
-      rechazado: 'bg-red-100 text-red-800'
+      [IncidentStatus.PENDIENTE]: 'bg-yellow-100 text-yellow-800',
+      [IncidentStatus.RESUELTO]: 'bg-green-100 text-green-800',
+      [IncidentStatus.RECHAZADO]: 'bg-red-100 text-red-800'
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
@@ -118,8 +118,8 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
             Todas
           </button>
           <button
-            onClick={() => setStatusFilter('pendiente')}
-            className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === 'pendiente'
+            onClick={() => setStatusFilter(IncidentStatus.PENDIENTE)}
+            className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === IncidentStatus.PENDIENTE
                 ? 'bg-yellow-100 text-yellow-700'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
@@ -127,8 +127,8 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
             Pendientes
           </button>
           <button
-            onClick={() => setStatusFilter('resuelto')}
-            className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === 'resuelto'
+            onClick={() => setStatusFilter(IncidentStatus.RESUELTO)}
+            className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === IncidentStatus.RESUELTO
                 ? 'bg-green-100 text-green-700'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
@@ -136,8 +136,8 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
             Resueltas
           </button>
           <button
-            onClick={() => setStatusFilter('rechazado')}
-            className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === 'rechazado'
+            onClick={() => setStatusFilter(IncidentStatus.RECHAZADO)}
+            className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === IncidentStatus.RECHAZADO
                 ? 'bg-red-100 text-red-700'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
@@ -156,13 +156,13 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-sm text-gray-600">Pendientes</p>
           <p className="text-2xl font-bold text-yellow-600 mt-1">
-            {incidents.filter(i => i.status === 'pendiente').length}
+            {incidents.filter(i => i.status === IncidentStatus.PENDIENTE).length}
           </p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-sm text-gray-600">Resueltas</p>
           <p className="text-2xl font-bold text-green-600 mt-1">
-            {incidents.filter(i => i.status === 'resuelto').length}
+            {incidents.filter(i => i.status === IncidentStatus.RESUELTO).length}
           </p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
@@ -221,17 +221,17 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
                       )}
                     </div>
                   </div>
-                  {canResolve && incident.status === 'pendiente' && (
+                  {canResolve && incident.status === IncidentStatus.PENDIENTE && (
                     <div className="flex gap-2">
                       <button
-                        onClick={() => onResolveIncident(incident.id, 'resuelto')}
+                        onClick={() => onResolveIncident(incident.id, IncidentStatus.RESUELTO)}
                         className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm"
                       >
                         <CheckCircle className="w-4 h-4" />
                         Resolver
                       </button>
                       <button
-                        onClick={() => onResolveIncident(incident.id, 'rechazado')}
+                        onClick={() => onResolveIncident(incident.id, IncidentStatus.RECHAZADO)}
                         className="flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm"
                       >
                         <XCircle className="w-4 h-4" />

@@ -16,7 +16,7 @@ import { getViewLabel } from '@/app/utils/views.helpers';
 import { User } from '@/app/types/User';
 import { Product } from '@/app/types/Product';
 import { Movement, MovementStatus, MovementType } from '@/app/types/Movement';
-import { Incident } from '@/app/types/Incident';
+import { Incident, IncidentStatus } from '@/app/types/Incident';
 import { SystemConfig } from '@/app/types/SystemConfig';
 import { login } from '@/services/auth.service';
 import * as ProductService from '@/services/product.service';
@@ -235,10 +235,10 @@ function App() {
     }
   };
 
-  const handleResolveIncident = async (id: string, status: 'resuelto' | 'rechazado') => {
+  const handleResolveIncident = async (id: string, status: IncidentStatus) => {
     try {
       const updated =
-        status === 'resuelto'
+        status === IncidentStatus.RESUELTO
           ? await IncidentService.resolveIncident(id)
           : await IncidentService.rejectIncident(id);
 
@@ -310,7 +310,15 @@ function App() {
             </div>
           ) : (
             <>
-              {currentView === 'dashboard' && <DashboardView products={products} movements={movements.filter(m => m.status === MovementStatus.APROBADO)} />}
+              {currentView === 'dashboard' &&
+                <DashboardView
+                  products={products}
+                  movements={movements}
+                  systemConfig={systemConfig}
+                  incidents={incidents}
+                  user={currentUser}
+                />
+              }
 
               {/* Admin */}
               {currentView === 'inventory' && <InventoryManagement products={products} onEdit={(p) => { setEditingProduct(p); setIsProductFormOpen(true); }} onDelete={handleDeleteProduct} onAdd={() => { setEditingProduct(null); setIsProductFormOpen(true); }} user={currentUser} />}

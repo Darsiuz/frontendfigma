@@ -5,14 +5,14 @@ const mapStatus = (status?: string): IncidentStatus => {
   switch (status?.toUpperCase()) {
     case 'RESOLVED':
     case 'RESUELTO':
-      return 'resuelto';
+      return IncidentStatus.RESUELTO;
     case 'REJECTED':
     case 'RECHAZADO':
-      return 'rechazado';
+      return IncidentStatus.RECHAZADO;
     case 'PENDING':
     case 'PENDIENTE':
     default:
-      return 'pendiente';
+      return IncidentStatus.PENDIENTE;
   }
 };
 

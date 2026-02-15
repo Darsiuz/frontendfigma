@@ -1,21 +1,43 @@
 import { Package, TrendingUp, AlertTriangle, Activity, DollarSign, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line } from 'recharts';
+import { motion } from "motion/react";
 
 import type { Product } from '@/app/types/Product';
 import { MovementStatus, MovementType, type Movement } from '@/app/types/Movement';
+import type { SystemConfig } from '@/app/types/SystemConfig';
+import { Incident, IncidentStatus } from '../types/Incident';
+import { User } from '../types/User';
+import { canViewIncidents, canViewMovements } from '../utils/permissions';
 
 interface DashboardViewProps {
   products: Product[];
   movements: Movement[];
+  incidents: Incident[];
+  systemConfig: SystemConfig | null;
+  user: User;
 }
 
-export function DashboardView({ products, movements }: DashboardViewProps) {
+export function DashboardView({ products, movements, systemConfig, incidents, user }: DashboardViewProps) {
   const totalProducts = products.length;
   const totalUnits = products.reduce((sum, p) => sum + p.quantity, 0);
   const totalValue = products.reduce((sum, p) => sum + (p.quantity * p.price), 0);
   const lowStockProducts = products.filter(p => p.quantity <= p.minStock).length;
-  
-  const todayMovements = movements.filter(m => {
+  const notificationsEnabled = systemConfig?.enableNotifications;
+
+  // Filtrar movimientos aprobados para actividad reciente
+  const approvedMovements = movements.filter(
+    m => m.status === MovementStatus.APROBADO
+  );
+
+  const pendingMovements = movements.filter(
+    m => m.status === MovementStatus.PENDIENTE
+  ).length;
+
+  const pendingIncidents = incidents.filter(
+    i => i.status === IncidentStatus.PENDIENTE
+  ).length;
+
+  const todayMovements = approvedMovements.filter(m => {
     const today = new Date();
     const movDate = new Date(m.date);
     return movDate.toDateString() === today.toDateString();
@@ -28,8 +50,8 @@ export function DashboardView({ products, movements }: DashboardViewProps) {
       existing.value += product.quantity;
       existing.totalValue += product.quantity * product.price;
     } else {
-      acc.push({ 
-        name: product.category, 
+      acc.push({
+        name: product.category,
         value: product.quantity,
         totalValue: product.quantity * product.price
       });
@@ -45,7 +67,7 @@ export function DashboardView({ products, movements }: DashboardViewProps) {
   });
 
   const movementsByDay = last7Days.map(date => {
-    const dayMovements = movements.filter(m => {
+    const dayMovements = approvedMovements.filter(m => {
       const movDate = new Date(m.date);
       return movDate.toDateString() === date.toDateString();
     });
@@ -64,7 +86,7 @@ export function DashboardView({ products, movements }: DashboardViewProps) {
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
-  const recentMovements = movements.slice(-5).reverse();
+  const recentMovements = approvedMovements.slice(-5).reverse();
 
   return (
     <div className="space-y-6">
@@ -115,6 +137,75 @@ export function DashboardView({ products, movements }: DashboardViewProps) {
           <p className="text-xs text-gray-500 mt-1">Registrados hoy</p>
         </div>
       </div>
+
+
+      {notificationsEnabled && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          {canViewMovements(user) && pendingMovements > 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+              <p className="text-sm text-yellow-700">Movimientos Pendientes</p>
+              <motion.p
+                key={pendingMovements}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                className="text-3xl font-bold text-yellow-800"
+              >
+                {pendingMovements}
+              </motion.p>
+            </div>
+          )}
+
+          {canViewIncidents(user) && pendingIncidents > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+              <p className="text-sm text-red-700">Incidencias Pendientes</p>
+              <motion.p
+                key={pendingIncidents}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                className="text-3xl font-bold text-red-800"
+              >
+                {pendingIncidents}
+              </motion.p>
+            </div>
+          )}
+
+        </div>
+      )}
+
+      {/* Alertas de stock bajo */}
+      {notificationsEnabled && lowStockProducts > 0 && (
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-6 h-6 text-orange-600 flex-shrink-0 mt-1" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-orange-900 mb-2">
+                Alerta: {lowStockProducts} {lowStockProducts === 1 ? 'producto tiene' : 'productos tienen'} stock bajo
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {products
+                  .filter(p => p.quantity <= p.minStock)
+                  .map(product => (
+                    <div key={product.id} className="flex items-center justify-between bg-white p-3 rounded border border-orange-200">
+                      <div>
+                        <p className="font-medium text-gray-900">{product.name}</p>
+                        <p className="text-sm text-gray-600">{product.category}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-orange-600">
+                          Stock: {product.quantity}
+                        </p>
+                        <p className="text-xs text-gray-500">Mín: {product.minStock}</p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -193,9 +284,8 @@ export function DashboardView({ products, movements }: DashboardViewProps) {
             ) : (
               recentMovements.map(movement => (
                 <div key={movement.id} className="flex items-start gap-3 p-3 border-b border-gray-100 last:border-b-0">
-                  <div className={`rounded-full p-2 ${
-                    movement.type === MovementType.ENTRADA ? 'bg-green-100' : 'bg-red-100'
-                  }`}>
+                  <div className={`rounded-full p-2 ${movement.type === MovementType.ENTRADA ? 'bg-green-100' : 'bg-red-100'
+                    }`}>
                     {movement.type === MovementType.ENTRADA ? (
                       <ArrowUpCircle className="w-4 h-4 text-green-600" />
                     ) : (
@@ -209,9 +299,8 @@ export function DashboardView({ products, movements }: DashboardViewProps) {
                       Por {movement.user} • {new Date(movement.date).toLocaleDateString('es-ES')}
                     </p>
                   </div>
-                  <p className={`font-semibold ${
-                    movement.type === MovementType.ENTRADA ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <p className={`font-semibold ${movement.type === MovementType.ENTRADA ? 'text-green-600' : 'text-red-600'
+                    }`}>
                     {movement.type === MovementType.ENTRADA ? '+' : '-'}{movement.quantity}
                   </p>
                 </div>
@@ -221,37 +310,7 @@ export function DashboardView({ products, movements }: DashboardViewProps) {
         </div>
       </div>
 
-      {/* Alertas de stock bajo */}
-      {lowStockProducts > 0 && (
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-6 h-6 text-orange-600 flex-shrink-0 mt-1" />
-            <div className="flex-1">
-              <h3 className="font-semibold text-orange-900 mb-2">
-                Alerta: {lowStockProducts} {lowStockProducts === 1 ? 'producto tiene' : 'productos tienen'} stock bajo
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {products
-                  .filter(p => p.quantity <= p.minStock)
-                  .map(product => (
-                    <div key={product.id} className="flex items-center justify-between bg-white p-3 rounded border border-orange-200">
-                      <div>
-                        <p className="font-medium text-gray-900">{product.name}</p>
-                        <p className="text-sm text-gray-600">{product.category}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-orange-600">
-                          Stock: {product.quantity}
-                        </p>
-                        <p className="text-xs text-gray-500">Mín: {product.minStock}</p>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

@@ -1,5 +1,12 @@
 export type IncidentType = 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro';
-export type IncidentStatus = 'pendiente' | 'resuelto' | 'rechazado';
+// export type IncidentStatus = 'pendiente' | 'resuelto' | 'rechazado';
+export enum IncidentStatus {
+    PENDIENTE = 'PENDIENTE',
+    RESUELTO = 'RESUELTO',
+    RECHAZADO = 'RECHAZADO'
+}
+
+export type IncidentFilter = IncidentStatus | 'all';
 
 export interface Incident {
     id: string;
