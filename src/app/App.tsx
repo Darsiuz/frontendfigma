@@ -20,15 +20,16 @@ import { Incident, IncidentStatus } from '@/app/types/Incident';
 import { SystemConfig } from '@/app/types/SystemConfig';
 import { login } from '@/services/auth.service';
 import * as ProductService from '@/services/product.service';
-import * as MovementService from '@/services/movement.service';
+// import * as MovementService from '@/services/movement.service';
 import * as IncidentService from '@/services/incident.service';
 import * as SystemConfigService from '@/services/systemConfig.service';
 
 import { canAccessView } from '@/app/utils/sidebar.permissions';
 
 import type { View } from '@/app/types/View';
-import { canViewIncidents, canViewMovements, canViewProduct, canViewSystemSettings } from './utils/permissions';
+import { canViewIncidents, canViewProduct, canViewSystemSettings } from './utils/permissions';
 import { toast } from "sonner";
+import { useMovements } from './features/movements/useMovements';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -38,7 +39,17 @@ function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [movements, setMovements] = useState<Movement[]>([]);
+  // const [movements, setMovements] = useState<Movement[]>([]);
+  const {
+    movements,
+    handleAddMovement,
+    handleApproveMovement,
+    handleRejectMovement,
+  } = useMovements({
+    user: currentUser,
+    products,
+    setProducts,
+  });
   const [incidents, setIncidents] = useState<Incident[]>([]);
   // const [appUsers, setAppUsers] = useState<AppUser[]>([]);
   const [systemConfig, setSystemConfig] = useState<SystemConfig | null>(null);
@@ -71,12 +82,12 @@ function App() {
     }
 
     // Movimientos
-    if (canViewMovements(currentUser)) {
+    // if (canViewMovements(currentUser)) {
 
-      MovementService.getMovements()
-        .then(setMovements)
-        .catch(() => console.warn('Movimientos no cargados'));
-    }
+    //   MovementService.getMovements()
+    //     .then(setMovements)
+    //     .catch(() => console.warn('Movimientos no cargados'));
+    // }
 
     // Incidencias
     if (canViewIncidents(currentUser)) {
@@ -171,61 +182,61 @@ function App() {
   };
 
   // Gestión de movimientos
-  const handleAddMovement = async (
-    movementData: Omit<Movement, 'id' | 'date' | 'productName' | 'user' | 'status'>
-  ) => {
-    const promise = MovementService.createMovement(movementData);
+  // const handleAddMovement = async (
+  //   movementData: Omit<Movement, 'id' | 'date' | 'productName' | 'user' | 'status'>
+  // ) => {
+  //   const promise = MovementService.createMovement(movementData);
 
-    toast.promise(promise, {
-      loading: "Registrando movimiento...",
-      success: "Movimiento registrado correctamente",
-      error: (err) =>
-        err?.response?.data?.message || "Error registrando movimiento",
-    });
+  //   toast.promise(promise, {
+  //     loading: "Registrando movimiento...",
+  //     success: "Movimiento registrado correctamente",
+  //     error: (err) =>
+  //       err?.response?.data?.message || "Error registrando movimiento",
+  //   });
 
-    try {
-      const newMovement: Movement = await promise;
+  //   try {
+  //     const newMovement: Movement = await promise;
 
-      setMovements(prev => [...prev, newMovement]);
+  //     setMovements(prev => [...prev, newMovement]);
 
-      if (newMovement.status === MovementStatus.APROBADO) {
-        setProducts(prev =>
-          prev.map(p =>
-            p.id === newMovement.productId
-              ? {
-                ...p,
-                quantity:
-                  newMovement.type === MovementType.ENTRADA
-                    ? p.quantity + newMovement.quantity
-                    : p.quantity - newMovement.quantity,
-              }
-              : p
-          )
-        );
-      }
+  //     if (newMovement.status === MovementStatus.APROBADO) {
+  //       setProducts(prev =>
+  //         prev.map(p =>
+  //           p.id === newMovement.productId
+  //             ? {
+  //               ...p,
+  //               quantity:
+  //                 newMovement.type === MovementType.ENTRADA
+  //                   ? p.quantity + newMovement.quantity
+  //                   : p.quantity - newMovement.quantity,
+  //             }
+  //             : p
+  //         )
+  //       );
+  //     }
 
-    } catch (error: any) { }
-  };
+  //   } catch (error: any) { }
+  // };
 
-  const handleApproveMovement = async (id: string) => {
-    try {
-      const updated = await MovementService.approveMovement(id);
-      setMovements(movements.map(m => (m.id === id ? updated : m)));
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Error aprobando movimiento');
-    }
-  };
+  // const handleApproveMovement = async (id: string) => {
+  //   try {
+  //     const updated = await MovementService.approveMovement(id);
+  //     setMovements(movements.map(m => (m.id === id ? updated : m)));
+  //   } catch (error: any) {
+  //     toast.error(error?.response?.data?.message || 'Error aprobando movimiento');
+  //   }
+  // };
 
-  const handleRejectMovement = async (id: string) => {
-    try {
-      const updated = await MovementService.rejectMovement(id);
-      setMovements(movements.map(m => (m.id === id ? updated : m)));
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Error rechazando movimiento');
-    }
-  };
+  // const handleRejectMovement = async (id: string) => {
+  //   try {
+  //     const updated = await MovementService.rejectMovement(id);
+  //     setMovements(movements.map(m => (m.id === id ? updated : m)));
+  //   } catch (error: any) {
+  //     toast.error(error?.response?.data?.message || 'Error rechazando movimiento');
+  //   }
+  // };
 
-  // Gestión de incidencias
+  // Gestión de incidencias 
   const handleAddIncident = async (incidentData: Omit<Incident, 'id' | 'productName' | 'reportedAt' | 'reportedBy' | 'status'>) => {
     try {
       const newIncident = await IncidentService.createIncident(incidentData);
