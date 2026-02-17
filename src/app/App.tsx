@@ -30,6 +30,7 @@ import type { View } from '@/app/types/View';
 import { canViewIncidents, canViewProduct, canViewSystemSettings } from './utils/permissions';
 import { toast } from "sonner";
 import { useMovements } from './features/movements/useMovements';
+import { useIncidents } from './features/incidents/useIncidents';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -40,17 +41,9 @@ function App() {
 
   const [products, setProducts] = useState<Product[]>([]);
   // const [movements, setMovements] = useState<Movement[]>([]);
-  const {
-    movements,
-    handleAddMovement,
-    handleApproveMovement,
-    handleRejectMovement,
-  } = useMovements({
-    user: currentUser,
-    products,
-    setProducts,
-  });
-  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const { movements, handleAddMovement, handleApproveMovement, handleRejectMovement, } = useMovements({ user: currentUser, products, setProducts, });
+  // const [incidents, setIncidents] = useState<Incident[]>([]);
+  const { incidents, handleAddIncident, handleResolveIncident, } = useIncidents({ user: currentUser, });
   // const [appUsers, setAppUsers] = useState<AppUser[]>([]);
   const [systemConfig, setSystemConfig] = useState<SystemConfig | null>(null);
 
@@ -79,22 +72,6 @@ function App() {
       ProductService.getProducts()
         .then(setProducts)
         .catch(() => console.warn('Productos no cargados'));
-    }
-
-    // Movimientos
-    // if (canViewMovements(currentUser)) {
-
-    //   MovementService.getMovements()
-    //     .then(setMovements)
-    //     .catch(() => console.warn('Movimientos no cargados'));
-    // }
-
-    // Incidencias
-    if (canViewIncidents(currentUser)) {
-
-      IncidentService.getIncidents()
-        .then(setIncidents)
-        .catch(() => console.warn('Incidencias no cargadas'));
     }
 
     // SystemConfig SOLO ADMIN
@@ -178,84 +155,6 @@ function App() {
       setProducts(products.filter(p => p.id !== id));
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Error eliminando producto');
-    }
-  };
-
-  // Gestión de movimientos
-  // const handleAddMovement = async (
-  //   movementData: Omit<Movement, 'id' | 'date' | 'productName' | 'user' | 'status'>
-  // ) => {
-  //   const promise = MovementService.createMovement(movementData);
-
-  //   toast.promise(promise, {
-  //     loading: "Registrando movimiento...",
-  //     success: "Movimiento registrado correctamente",
-  //     error: (err) =>
-  //       err?.response?.data?.message || "Error registrando movimiento",
-  //   });
-
-  //   try {
-  //     const newMovement: Movement = await promise;
-
-  //     setMovements(prev => [...prev, newMovement]);
-
-  //     if (newMovement.status === MovementStatus.APROBADO) {
-  //       setProducts(prev =>
-  //         prev.map(p =>
-  //           p.id === newMovement.productId
-  //             ? {
-  //               ...p,
-  //               quantity:
-  //                 newMovement.type === MovementType.ENTRADA
-  //                   ? p.quantity + newMovement.quantity
-  //                   : p.quantity - newMovement.quantity,
-  //             }
-  //             : p
-  //         )
-  //       );
-  //     }
-
-  //   } catch (error: any) { }
-  // };
-
-  // const handleApproveMovement = async (id: string) => {
-  //   try {
-  //     const updated = await MovementService.approveMovement(id);
-  //     setMovements(movements.map(m => (m.id === id ? updated : m)));
-  //   } catch (error: any) {
-  //     toast.error(error?.response?.data?.message || 'Error aprobando movimiento');
-  //   }
-  // };
-
-  // const handleRejectMovement = async (id: string) => {
-  //   try {
-  //     const updated = await MovementService.rejectMovement(id);
-  //     setMovements(movements.map(m => (m.id === id ? updated : m)));
-  //   } catch (error: any) {
-  //     toast.error(error?.response?.data?.message || 'Error rechazando movimiento');
-  //   }
-  // };
-
-  // Gestión de incidencias 
-  const handleAddIncident = async (incidentData: Omit<Incident, 'id' | 'productName' | 'reportedAt' | 'reportedBy' | 'status'>) => {
-    try {
-      const newIncident = await IncidentService.createIncident(incidentData);
-      setIncidents([...incidents, newIncident]);
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Error registrando incidencia');
-    }
-  };
-
-  const handleResolveIncident = async (id: string, status: IncidentStatus) => {
-    try {
-      const updated =
-        status === IncidentStatus.RESUELTO
-          ? await IncidentService.resolveIncident(id)
-          : await IncidentService.rejectIncident(id);
-
-      setIncidents(incidents.map(i => (i.id === id ? updated : i)));
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Error actualizando incidencia');
     }
   };
 
