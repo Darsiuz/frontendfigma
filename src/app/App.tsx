@@ -15,22 +15,19 @@ import { getViewLabel } from '@/app/utils/views.helpers';
 
 import { User } from '@/app/types/User';
 import { Product } from '@/app/types/Product';
-import { Movement, MovementStatus, MovementType } from '@/app/types/Movement';
-import { Incident, IncidentStatus } from '@/app/types/Incident';
+import { MovementStatus } from '@/app/types/Movement';
 import { SystemConfig } from '@/app/types/SystemConfig';
 import { login } from '@/services/auth.service';
-import * as ProductService from '@/services/product.service';
-// import * as MovementService from '@/services/movement.service';
-import * as IncidentService from '@/services/incident.service';
 import * as SystemConfigService from '@/services/systemConfig.service';
 
 import { canAccessView } from '@/app/utils/sidebar.permissions';
 
 import type { View } from '@/app/types/View';
-import { canViewIncidents, canViewProduct, canViewSystemSettings } from './utils/permissions';
+import { canViewSystemSettings } from './utils/permissions';
 import { toast } from "sonner";
 import { useMovements } from './features/movements/useMovements';
 import { useIncidents } from './features/incidents/useIncidents';
+import { useProducts } from './features/products/userProducts';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -39,11 +36,12 @@ function App() {
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  const [products, setProducts] = useState<Product[]>([]);
+  // const [products, setProducts] = useState<Product[]>([]);
+  const { products, setProducts, handleAddProduct, handleEditProduct, handleDeleteProduct } = useProducts({ user: currentUser });
   // const [movements, setMovements] = useState<Movement[]>([]);
-  const { movements, handleAddMovement, handleApproveMovement, handleRejectMovement, } = useMovements({ user: currentUser, products, setProducts, });
+  const { movements, handleAddMovement, handleApproveMovement, handleRejectMovement } = useMovements({ user: currentUser, products, setProducts });
   // const [incidents, setIncidents] = useState<Incident[]>([]);
-  const { incidents, handleAddIncident, handleResolveIncident, } = useIncidents({ user: currentUser, });
+  const { incidents, handleAddIncident, handleResolveIncident } = useIncidents({ user: currentUser });
   // const [appUsers, setAppUsers] = useState<AppUser[]>([]);
   const [systemConfig, setSystemConfig] = useState<SystemConfig | null>(null);
 
@@ -65,14 +63,6 @@ function App() {
   // Cargar datos desde el servicio de base de datos
   useEffect(() => {
     if (!isLoggedIn || !currentUser) return;
-
-    // Productos
-    if (canViewProduct(currentUser)) {
-
-      ProductService.getProducts()
-        .then(setProducts)
-        .catch(() => console.warn('Productos no cargados'));
-    }
 
     // SystemConfig SOLO ADMIN
     if (canViewSystemSettings(currentUser)) {
@@ -121,41 +111,6 @@ function App() {
     setCurrentUser(null);
     setIsLoggedIn(false);
     setCurrentView('dashboard');
-  };
-
-  // Gestión de productos
-  const handleAddProduct = async (productData: Omit<Product, 'id'>) => {
-    try {
-      const newProduct = await ProductService.createProduct(productData);
-      setProducts([...products, newProduct]);
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Error creando producto');
-    }
-  };
-
-  const handleEditProduct = async (productData: Omit<Product, 'id'>) => {
-    if (!editingProduct) return;
-
-    try {
-      const updated = await ProductService.updateProduct(
-        editingProduct.id,
-        productData
-      );
-
-      setProducts(products.map(p => (p.id === updated.id ? updated : p)));
-      setEditingProduct(null);
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Error actualizando producto');
-    }
-  };
-
-  const handleDeleteProduct = async (id: number) => {
-    try {
-      await ProductService.deleteProduct(id);
-      setProducts(products.filter(p => p.id !== id));
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Error eliminando producto');
-    }
   };
 
   // Configuración del sistema
@@ -257,7 +212,14 @@ function App() {
         </main>
       </div>
 
-      <ProductForm isOpen={isProductFormOpen} onClose={() => { setIsProductFormOpen(false); setEditingProduct(null); }} onSave={editingProduct ? handleEditProduct : handleAddProduct} editProduct={editingProduct} />
+      <ProductForm isOpen={isProductFormOpen}
+        onClose={() => { setIsProductFormOpen(false); setEditingProduct(null); }}
+        onSave={(data) =>
+          editingProduct
+            ? handleEditProduct(editingProduct.id, data)
+            : handleAddProduct(data)
+        }
+        editProduct={editingProduct} />
     </div>
   );
 }
