@@ -3,7 +3,6 @@ import { Settings, Save, RotateCcw } from 'lucide-react';
 import { SystemConfig } from '@/app/types/SystemConfig';
 import { toast } from "sonner";
 
-
 interface SystemSettingsProps {
   config: SystemConfig | null;
   onSave: (config: SystemConfig) => void;

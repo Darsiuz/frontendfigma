@@ -13,24 +13,21 @@ import { ApproveMovements } from '@/app/components/ApproveMovements';
 import { getDefaultViewByRole } from '@/app/utils/defaultViewByRole';
 import { getViewLabel } from '@/app/utils/views.helpers';
 
-import { User } from '@/app/types/User';
 import { Product } from '@/app/types/Product';
 import { MovementStatus } from '@/app/types/Movement';
-import { login } from '@/services/auth.service';
 
 import { canAccessView } from '@/app/utils/sidebar.permissions';
 
 import type { View } from '@/app/types/View';
-import { toast } from "sonner";
-import { useMovements } from './features/movements/useMovements';
-import { useIncidents } from './features/incidents/useIncidents';
-import { useProducts } from './features/products/userProducts';
-import { useSystemConfig } from './features/system/useSystemConfig';
+import { useMovements } from '@/app/features/movements/useMovements';
+import { useIncidents } from '@/app/features/incidents/useIncidents';
+import { useProducts } from '@/app/features/products/useProducts';
+import { useSystemConfig } from '@/app/features/system/useSystemConfig';
+import { useAuth } from "@/app/features/auth/useAuth";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [authLoading, setAuthLoading] = useState(true); // esto es para manejar la carga antes de login
+  const { isLoggedIn, currentUser, authLoading, handleLogin, handleLogout, } = useAuth();
+
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -42,22 +39,6 @@ function App() {
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("currentUser");
-    const token = localStorage.getItem("token");
-
-    if (saved && token) {
-      setCurrentUser(JSON.parse(saved));
-      setIsLoggedIn(true);
-    }
-    setAuthLoading(false);
-  }, []);
-
-  // Cargar datos desde el servicio de base de datos
-  useEffect(() => {
-    if (!isLoggedIn || !currentUser) return;
-  }, [isLoggedIn, currentUser]);
-
   // Redirigir al que no tiene acceso a la vista actual
   useEffect(() => {
     if (currentUser && !canAccessView(currentUser, currentView)) {
@@ -65,41 +46,18 @@ function App() {
     }
   }, [currentView, currentUser]);
 
-
-  const handleLogin = async (email: string, password: string) => {
-    try {
-      const response = await login({ email, password });
-
-      // GUARDAR JWT
-      localStorage.setItem("token", response.token);
-
-      const mappedUser: User = {
-        email: response.email,
-        name: response.name,
-        role: response.role.toLowerCase() as User['role'],
-      };
-
-      localStorage.setItem("currentUser", JSON.stringify(mappedUser));
-
-      setCurrentUser(mappedUser);
-      setIsLoggedIn(true);
-      setCurrentView(getDefaultViewByRole(mappedUser));
-
-    } catch {
-      toast.error('Credenciales incorrectas');
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("currentUser");
-    setCurrentUser(null);
-    setIsLoggedIn(false);
-    setCurrentView('dashboard');
-  };
-
   if (!isLoggedIn || !currentUser) {
-    return <Login onLogin={handleLogin} />;
+    return (
+      <Login
+        onLogin={async (email, password) => {
+          const user = await handleLogin(email, password);
+
+          if (user) {
+            setCurrentView(getDefaultViewByRole(user));
+          }
+        }}
+      />
+    );
   }
 
   const canRenderView = currentUser ? canAccessView(currentUser, currentView) : false;
