@@ -1,0 +1,46 @@
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+
+import type { SystemConfig } from "@/app/types/SystemConfig";
+import type { User } from "@/app/types/User";
+
+import * as SystemConfigService from "@/services/systemConfig.service";
+import { canViewSystemSettings } from "@/app/utils/permissions";
+
+interface UseSystemConfigProps {
+    user: User | null;
+}
+
+export function useSystemConfig({ user }: UseSystemConfigProps) {
+    const [systemConfig, setSystemConfig] = useState<SystemConfig | null>(null);
+
+    // Cargar configuracion
+    useEffect(() => {
+        if (!user) return;
+
+        if (!canViewSystemSettings(user)) return;
+
+        SystemConfigService.getSystemConfig()
+            .then(setSystemConfig)
+            .catch(() => console.warn("SystemConfig no cargado"));
+    }, [user]);
+
+    // Guardar configuracion
+    const handleSaveConfig = async (config: SystemConfig) => {
+        try {
+            const updated = await SystemConfigService.updateSystemConfig(config);
+            setSystemConfig(updated);
+            toast.success("Configuracion guardada correctamente");
+        } catch (error: any) {
+            toast.error(
+                error?.response?.data?.message ||
+                "Error guardando configuracion"
+            );
+        }
+    };
+
+    return {
+        systemConfig,
+        handleSaveConfig,
+    };
+}

@@ -16,18 +16,16 @@ import { getViewLabel } from '@/app/utils/views.helpers';
 import { User } from '@/app/types/User';
 import { Product } from '@/app/types/Product';
 import { MovementStatus } from '@/app/types/Movement';
-import { SystemConfig } from '@/app/types/SystemConfig';
 import { login } from '@/services/auth.service';
-import * as SystemConfigService from '@/services/systemConfig.service';
 
 import { canAccessView } from '@/app/utils/sidebar.permissions';
 
 import type { View } from '@/app/types/View';
-import { canViewSystemSettings } from './utils/permissions';
 import { toast } from "sonner";
 import { useMovements } from './features/movements/useMovements';
 import { useIncidents } from './features/incidents/useIncidents';
 import { useProducts } from './features/products/userProducts';
+import { useSystemConfig } from './features/system/useSystemConfig';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -36,14 +34,10 @@ function App() {
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  // const [products, setProducts] = useState<Product[]>([]);
   const { products, setProducts, handleAddProduct, handleEditProduct, handleDeleteProduct } = useProducts({ user: currentUser });
-  // const [movements, setMovements] = useState<Movement[]>([]);
   const { movements, handleAddMovement, handleApproveMovement, handleRejectMovement } = useMovements({ user: currentUser, products, setProducts });
-  // const [incidents, setIncidents] = useState<Incident[]>([]);
   const { incidents, handleAddIncident, handleResolveIncident } = useIncidents({ user: currentUser });
-  // const [appUsers, setAppUsers] = useState<AppUser[]>([]);
-  const [systemConfig, setSystemConfig] = useState<SystemConfig | null>(null);
+  const { systemConfig, handleSaveConfig, } = useSystemConfig({ user: currentUser });
 
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -56,21 +50,12 @@ function App() {
       setCurrentUser(JSON.parse(saved));
       setIsLoggedIn(true);
     }
-
     setAuthLoading(false);
   }, []);
 
   // Cargar datos desde el servicio de base de datos
   useEffect(() => {
     if (!isLoggedIn || !currentUser) return;
-
-    // SystemConfig SOLO ADMIN
-    if (canViewSystemSettings(currentUser)) {
-      SystemConfigService.getSystemConfig()
-        .then(setSystemConfig)
-        .catch(() => console.warn('SystemConfig no cargado'));
-    }
-
   }, [isLoggedIn, currentUser]);
 
   // Redirigir al que no tiene acceso a la vista actual
@@ -111,18 +96,6 @@ function App() {
     setCurrentUser(null);
     setIsLoggedIn(false);
     setCurrentView('dashboard');
-  };
-
-  // Configuración del sistema
-  const handleSaveConfig = async (config: SystemConfig) => {
-    try {
-      const updated = await SystemConfigService.updateSystemConfig(config);
-      setSystemConfig(updated);
-      toast.success('Configuracion guardada correctamente');
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Error guardando configuracion');
-      alert('Error guardando configuracion');
-    }
   };
 
   if (!isLoggedIn || !currentUser) {
