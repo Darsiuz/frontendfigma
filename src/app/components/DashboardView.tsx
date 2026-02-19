@@ -138,10 +138,10 @@ export function DashboardView({ products, movements, systemConfig, incidents, us
         </div>
       </div>
 
-
       {notificationsEnabled && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
+          {/* Alertas de movimientos pendientes */}
           {canViewMovements(user) && pendingMovements > 0 && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
               <p className="text-sm text-yellow-700">Movimientos Pendientes</p>
@@ -157,6 +157,7 @@ export function DashboardView({ products, movements, systemConfig, incidents, us
             </div>
           )}
 
+          {/* Alertas de incidencias pendientes */}
           {canViewIncidents(user) && pendingIncidents > 0 && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-6">
               <p className="text-sm text-red-700">Incidencias Pendientes</p>

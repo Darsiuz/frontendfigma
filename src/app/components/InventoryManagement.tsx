@@ -19,7 +19,6 @@ export function InventoryManagement({ products, onEdit, onDelete, onAdd, user }:
 
   const categories = ['all', ...new Set(products.map(p => p.category))];
 
-  // const canEdit = user.role === 'admin' || user.role === 'manager';
   const canCreate = canCreateProduct(user);
   const canEdit = canEditProduct(user);
   const canDelete = canDeleteProduct(user);

@@ -5,7 +5,7 @@ import type { SystemConfig } from "@/app/types/SystemConfig";
 import type { User } from "@/app/types/User";
 
 import * as SystemConfigService from "@/services/systemConfig.service";
-import { canViewSystemSettings } from "@/app/utils/permissions";
+import { canViewSystemSettings, canEditSystemSettings } from "@/app/utils/permissions";
 
 interface UseSystemConfigProps {
     user: User | null;
@@ -22,11 +22,15 @@ export function useSystemConfig({ user }: UseSystemConfigProps) {
 
         SystemConfigService.getSystemConfig()
             .then(setSystemConfig)
-            .catch(() => console.warn("SystemConfig no cargado"));
+            .catch(() => toast.error("Error cargando configuracion del sistema"));
     }, [user]);
 
     // Guardar configuracion
     const handleSaveConfig = async (config: SystemConfig) => {
+        if (!canEditSystemSettings(user!)) {
+            toast.error("No tienes permisos para editar la configuracion del sistema");
+            return;
+        }
         try {
             const updated = await SystemConfigService.updateSystemConfig(config);
             setSystemConfig(updated);

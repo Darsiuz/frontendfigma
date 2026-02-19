@@ -86,12 +86,15 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            {user.role === 'operator' ? 'Registrar Incidencias' : 'Gestión de Incidencias'}
+            {canResolve
+              ? 'Gestión de Incidencias'
+              : 'Registrar Incidencias'}
           </h2>
+
           <p className="text-gray-600 mt-1">
-            {user.role === 'operator'
-              ? 'Reporte problemas y anomalías en el inventario'
-              : 'Gestione y resuelva incidencias del inventario'}
+            {canResolve
+              ? 'Gestione y resuelva incidencias del inventario'
+              : 'Reporte problemas y anomalías en el inventario'}
           </p>
         </div>
         {canCreate && (
@@ -111,8 +114,8 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
           <button
             onClick={() => setStatusFilter('all')}
             className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === 'all'
-                ? 'bg-blue-100 text-blue-700'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-blue-100 text-blue-700'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
           >
             Todas
@@ -120,8 +123,8 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
           <button
             onClick={() => setStatusFilter(IncidentStatus.PENDIENTE)}
             className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === IncidentStatus.PENDIENTE
-                ? 'bg-yellow-100 text-yellow-700'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-yellow-100 text-yellow-700'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
           >
             Pendientes
@@ -129,8 +132,8 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
           <button
             onClick={() => setStatusFilter(IncidentStatus.RESUELTO)}
             className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === IncidentStatus.RESUELTO
-                ? 'bg-green-100 text-green-700'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-green-100 text-green-700'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
           >
             Resueltas
@@ -138,8 +141,8 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
           <button
             onClick={() => setStatusFilter(IncidentStatus.RECHAZADO)}
             className={`px-4 py-2 rounded-lg transition-colors ${statusFilter === IncidentStatus.RECHAZADO
-                ? 'bg-red-100 text-red-700'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-red-100 text-red-700'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
           >
             Rechazadas
