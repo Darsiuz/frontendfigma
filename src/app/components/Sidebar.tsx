@@ -3,6 +3,8 @@ import type { View } from '@/app/types/View';
 import { User } from '@/app/types/User';
 import { canAccessView } from '@/app/utils/sidebar.permissions';
 import { VIEWS_CONFIG } from '@/app/utils/views.config';
+import { SystemConfig } from '../types/SystemConfig';
+import { motion } from 'motion/react';
 
 interface SidebarProps {
   currentView: View;
@@ -11,12 +13,11 @@ interface SidebarProps {
   onLogout: () => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  systemConfig: SystemConfig | null;
 }
 
-export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, onToggleCollapse }: SidebarProps) {
-  const visibleMenuItems = VIEWS_CONFIG.filter(view =>
-  canAccessView(user, view.id)
-);
+export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, onToggleCollapse, systemConfig }: SidebarProps) {
+  const visibleMenuItems = VIEWS_CONFIG.filter(view => canAccessView(user, view.id));
 
   const getRoleLabel = (role: string) => {
     const roles: { [key: string]: string } = {
@@ -50,8 +51,24 @@ export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, 
                 <Package className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="font-semibold text-gray-900 text-sm">Almacén</h2>
-                <p className="text-xs text-gray-500">Control</p>
+                <motion.h2
+                  key={systemConfig?.companyName}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="font-semibold text-gray-900 text-sm"
+                >
+                  {systemConfig?.companyName || "Almacen"}
+                </motion.h2>
+                <motion.p
+                  key={systemConfig?.defaultLocation}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                  className="text-xs text-gray-500"
+                >
+                  {systemConfig?.defaultLocation || "Control"}
+                </motion.p>
               </div>
             </div>
           )}

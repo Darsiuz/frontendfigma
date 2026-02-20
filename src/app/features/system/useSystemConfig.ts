@@ -16,12 +16,23 @@ export function useSystemConfig({ user }: UseSystemConfigProps) {
 
     // Cargar configuracion
     useEffect(() => {
-        if (!user) return;
+        if (!systemConfig?.companyName) return;
+        document.title = systemConfig.companyName;
+    }, [systemConfig]);
 
+    useEffect(() => {
+        if (!user) return;
         if (!canViewSystemSettings(user)) return;
+        const cached = localStorage.getItem("systemConfig");
+        if (cached) {
+            setSystemConfig(JSON.parse(cached));
+        }
 
         SystemConfigService.getSystemConfig()
-            .then(setSystemConfig)
+            .then(config => {
+                setSystemConfig(config);
+                localStorage.setItem("systemConfig", JSON.stringify(config));
+            })
             .catch(() => toast.error("Error cargando configuracion del sistema"));
     }, [user]);
 

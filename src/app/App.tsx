@@ -61,7 +61,6 @@ function App() {
   }
 
   const canRenderView = currentUser ? canAccessView(currentUser, currentView) : false;
-
   if (authLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -80,6 +79,7 @@ function App() {
         onLogout={handleLogout}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        systemConfig={systemConfig}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
