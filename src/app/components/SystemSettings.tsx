@@ -81,6 +81,7 @@ export function SystemSettings({ config, onSave }: SystemSettingsProps) {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="USD">USD ($)</option>
+                <option value="PEN">PEN (S/)</option>
                 <option value="EUR">EUR (€)</option>
                 <option value="MXN">MXN ($)</option>
                 <option value="COP">COP ($)</option>
@@ -98,44 +99,6 @@ export function SystemSettings({ config, onSave }: SystemSettingsProps) {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Ej: Almacén Principal"
               />
-            </div>
-          </div>
-        </div>
-
-        {/* Configuración de Inventario */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Parámetros de Inventario</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Umbral de Stock Bajo (%)
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={formData.lowStockThreshold}
-                onChange={(e) => setFormData({ ...formData, lowStockThreshold: parseInt(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Se alertará cuando el stock esté por debajo de este porcentaje
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Stock Máximo por Producto
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={formData.maxStockPerProduct}
-                onChange={(e) => setFormData({ ...formData, maxStockPerProduct: parseInt(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Límite máximo de unidades por producto
-              </p>
             </div>
           </div>
         </div>
@@ -206,15 +169,15 @@ export function SystemSettings({ config, onSave }: SystemSettingsProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
               <p className="text-blue-700">Versión del Sistema</p>
-              <p className="font-medium text-blue-900">v2.1.0</p>
+              <p className="font-medium text-blue-900">v{__APP_VERSION__}</p>
             </div>
             <div>
               <p className="text-blue-700">Última Actualización</p>
-              <p className="font-medium text-blue-900">14 Enero 2026</p>
+              <p className="font-medium text-blue-900">{new Date(__BUILD_DATE__).toLocaleDateString('es-ES')}</p>
             </div>
             <div>
               <p className="text-blue-700">Licencia</p>
-              <p className="font-medium text-blue-900">Empresarial</p>
+              <p className="font-medium text-blue-900">{__APP_LICENSE__}</p>
             </div>
           </div>
         </div>
@@ -246,7 +209,7 @@ export function SystemSettings({ config, onSave }: SystemSettingsProps) {
         {hasChanges && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <p className="text-sm text-yellow-800">
-              ⚠️ Hay cambios sin guardar. Haz clic en "Guardar Configuración" para aplicar los cambios.
+              Hay cambios sin guardar. Haz clic en "Guardar Configuracion" para aplicar los cambios.
             </p>
           </div>
         )}

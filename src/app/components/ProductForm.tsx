@@ -8,9 +8,10 @@ interface ProductFormProps {
   onClose: () => void;
   onSave: (product: Omit<Product, 'id'>) => void;
   editProduct?: Product | null;
+  formErrors?: Record<string, string>;
 }
 
-export function ProductForm({ isOpen, onClose, onSave, editProduct }: ProductFormProps) {
+export function ProductForm({ isOpen, onClose, onSave, editProduct, formErrors }: ProductFormProps) {
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -42,10 +43,14 @@ export function ProductForm({ isOpen, onClose, onSave, editProduct }: ProductFor
     }
   }, [editProduct, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   onSave(formData);
+  //   onClose();
+  // };
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -75,9 +80,16 @@ export function ProductForm({ isOpen, onClose, onSave, editProduct }: ProductFor
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 
+                ${formErrors?.name ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
+              `}
               placeholder="Ej: Laptop HP"
             />
+            {formErrors?.name && (
+              <p className="text-red-500 text-sm mt-1">
+                {formErrors.name}
+              </p>
+            )}
           </div>
 
           <div>
@@ -89,9 +101,16 @@ export function ProductForm({ isOpen, onClose, onSave, editProduct }: ProductFor
               required
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 
+                ${formErrors?.category ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
+              `}
               placeholder="Ej: Electrónica"
             />
+            {formErrors?.category && (
+              <p className="text-red-500 text-sm mt-1">
+                {formErrors.category}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -105,8 +124,15 @@ export function ProductForm({ isOpen, onClose, onSave, editProduct }: ProductFor
                 min="0"
                 value={formData.quantity}
                 onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 
+                  ${formErrors?.quantity ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
+                `}
               />
+              {formErrors?.quantity && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.quantity}
+                </p>
+              )}
             </div>
 
             <div>
@@ -119,8 +145,15 @@ export function ProductForm({ isOpen, onClose, onSave, editProduct }: ProductFor
                 min="0"
                 value={formData.minStock}
                 onChange={(e) => setFormData({ ...formData, minStock: parseInt(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 
+                  ${formErrors?.minStock ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
+                `}
               />
+              {formErrors?.minStock && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.minStock}
+                </p>
+              )}
             </div>
           </div>
 
@@ -137,9 +170,16 @@ export function ProductForm({ isOpen, onClose, onSave, editProduct }: ProductFor
                 step="0.01"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 
+                  ${formErrors?.price ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
+                `}
                 placeholder="0.00"
               />
+              {formErrors?.price && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.price}
+                </p>
+              )}
             </div>
           </div>
 
@@ -152,9 +192,16 @@ export function ProductForm({ isOpen, onClose, onSave, editProduct }: ProductFor
               required
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 
+                ${formErrors?.location ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
+              `}
               placeholder="Ej: Pasillo A, Estante 3"
             />
+            {formErrors?.location && (
+              <p className="text-red-500 text-sm mt-1">
+                {formErrors.location}
+              </p>
+            )}
           </div>
 
           <div className="flex gap-3 pt-4">

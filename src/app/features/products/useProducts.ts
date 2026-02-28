@@ -13,6 +13,7 @@ interface UseProductsProps {
 
 export function useProducts({ user }: UseProductsProps) {
   const [products, setProducts] = useState<Product[]>([]);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   // Cargar productos
   useEffect(() => {
@@ -30,11 +31,16 @@ export function useProducts({ user }: UseProductsProps) {
     try {
       const newProduct = await ProductService.createProduct(productData);
       setProducts((prev) => [...prev, newProduct]);
+      setFormErrors({});
       toast.success("Producto creado correctamente");
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || "Error creando producto"
-      );
+      const backendErrors = error?.response?.data?.errors;
+
+      if (backendErrors) {
+        setFormErrors(backendErrors);
+      } else {
+        toast.error(error?.response?.data?.message || "Error creando producto");
+      }
     }
   };
 
@@ -73,9 +79,10 @@ export function useProducts({ user }: UseProductsProps) {
 
   return {
     products,
-    setProducts, // importante para que movements pueda actualizar stock
+    setProducts,
     handleAddProduct,
     handleEditProduct,
     handleDeleteProduct,
+    formErrors,
   };
 }

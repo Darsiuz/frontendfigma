@@ -8,6 +8,7 @@ import type { SystemConfig } from '@/app/types/SystemConfig';
 import { Incident, IncidentStatus } from '../types/Incident';
 import { User } from '../types/User';
 import { canViewIncidents, canViewMovements } from '../utils/permissions';
+import { getCurrencySymbol } from '@/app/utils/currency';
 
 interface DashboardViewProps {
   products: Product[];
@@ -23,6 +24,7 @@ export function DashboardView({ products, movements, systemConfig, incidents, us
   const totalValue = products.reduce((sum, p) => sum + (p.quantity * p.price), 0);
   const lowStockProducts = products.filter(p => p.quantity <= p.minStock).length;
   const notificationsEnabled = systemConfig?.enableNotifications;
+  const currencySymbol = getCurrencySymbol(systemConfig?.currency);
 
   // Filtrar movimientos aprobados para actividad reciente
   const approvedMovements = movements.filter(
@@ -115,7 +117,7 @@ export function DashboardView({ products, movements, systemConfig, incidents, us
             <p className="text-sm text-gray-600">Valor Total</p>
             <DollarSign className="w-5 h-5 text-purple-600" />
           </div>
-          <p className="text-3xl font-bold text-gray-900">${totalValue.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-gray-900">{currencySymbol} {totalValue.toLocaleString()}</p>
           <p className="text-xs text-gray-500 mt-1">Valor del inventario</p>
         </div>
 
@@ -268,7 +270,7 @@ export function DashboardView({ products, movements, systemConfig, incidents, us
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">${(product.quantity * product.price).toLocaleString()}</p>
+                  <p className="font-semibold text-gray-900">{currencySymbol} {(product.quantity * product.price).toLocaleString()}</p>
                   <p className="text-xs text-gray-500">{product.quantity} unidades</p>
                 </div>
               </div>
