@@ -1,14 +1,6 @@
 import api from "./api";
 import { ApiUser } from "@/app/types/User";
 
-export interface UserDTO {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  active: boolean;
-}
-
 export const getUsers = async (): Promise<ApiUser[]> => {
   const res = await api.get<ApiUser[]>("/admin/users");
   return res.data;
@@ -35,9 +27,10 @@ export const updateUser = async (id: number, user: {
   return res.data;
 };
 
-export const disableUser = async (id: number) => {
-  await api.patch(`/admin/users/${id}/disable`);
-};
+export const toggleUser = async (id: number, active: boolean) => {
+  const res = await api.patch(`/admin/users/${id}/toggle`, { active });
+  return res.data;
+}
 
 export const deleteUser = async (id: number) => {
   await api.delete(`/admin/users/${id}`);

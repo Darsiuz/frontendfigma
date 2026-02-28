@@ -37,7 +37,6 @@ export const canAccessView = (u: U, view: View): boolean => {
     case 'audit-inventory':
     case 'audit-movements':
     case 'audit-reports':
-    case 'export-audit':
       return AUDITOR(u);
 
     default:

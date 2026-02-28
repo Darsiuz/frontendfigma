@@ -1,4 +1,4 @@
-import { ViewConfig } from '@/app/types/View';
+import { ViewConfig, type View } from '@/app/types/View';
 import { LayoutDashboard, Package, TrendingUp, Users, FileText, Settings, AlertTriangle, CheckCircle } from 'lucide-react';
 
 // ACA SE CAMBIA EL ORDEN DE LOS ITEMS EN EL SIDEBAR, ASI COMO LOS ICONOS Y LOS LABELS
@@ -30,3 +30,9 @@ export const VIEWS_CONFIG: ViewConfig[] = [
   
   { id: 'settings', label: 'Configuracion Sistema', icon: Settings },
 ];
+
+// Solo es para obtener un label en el header
+export const getViewLabel = (view: View): string => {
+  const found = VIEWS_CONFIG.find(v => v.id === view);
+  return found?.label ?? 'Dashboard';
+};

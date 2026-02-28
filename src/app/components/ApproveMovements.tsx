@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Clock, CheckCircle, XCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
-import { Movement, MovementStatus, MovementFilter, MovementType } from '@/app/types/Movement';
+import { MovementStatus, MovementFilter, MovementType } from '@/app/types/Movement';
 import { useAppContext } from '@/app/context/AppContext';
 
 interface ApproveMovementsProps {

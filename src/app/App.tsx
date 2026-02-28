@@ -11,10 +11,9 @@ import { SystemSettings } from '@/app/components/SystemSettings';
 import { IncidentManagement } from '@/app/components/IncidentManagement';
 import { ApproveMovements } from '@/app/components/ApproveMovements';
 import { getDefaultViewByRole } from '@/app/utils/defaultViewByRole';
-import { getViewLabel } from '@/app/utils/views.helpers';
+import { getViewLabel } from '@/app/utils/views.config';
 
 import { Product } from '@/app/types/Product';
-import { MovementStatus } from '@/app/types/Movement';
 
 import { canAccessView } from '@/app/utils/sidebar.permissions';
 

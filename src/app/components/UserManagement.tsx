@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { getUsers, createUser, updateUser, deleteUser, disableUser } from "@/services/user.service";
-import { Users, Plus, Edit, Trash2, X, Shield, Mail, User as UserIcon } from 'lucide-react';
+import { getUsers, createUser, updateUser, deleteUser, toggleUser } from "@/services/user.service";
+import { Plus, Edit, Trash2, X, Shield, Mail, User as UserIcon, Check } from 'lucide-react';
 import type { AppUser, ApiUser } from '@/app/types/User';
+import { getAccessibleViewsForRole, ALL_ROLES_LIST } from '@/app/utils/roleDescriptions';
 import { toast } from "sonner";
+import { ALL_ROLES, ROLE_CONFIG } from "../utils/role.config";
 
 export function UserManagement() {
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -48,7 +50,7 @@ export function UserManagement() {
       name: '',
       email: '',
       password: '',
-      role: 'operator',
+      role: 'admin',
       status: 'active',
     });
     setEditingUser(null);
@@ -66,6 +68,16 @@ export function UserManagement() {
     setIsModalOpen(true);
   };
 
+  const handleToggleUser = async (id: string, active: boolean) => {
+    try {
+      await toggleUser(Number(id), active);
+      setUsers(users.map(u => u.id === id ? { ...u, status: active ? 'active' : 'inactive' } : u));
+      toast.info(`Usuario ${active ? 'activado' : 'desactivado'} correctamente`);
+    } catch (e) {
+      toast.error("Error actualizando estado del usuario");
+    }
+  };
+
   const handleDeleteUser = async (id: string) => {
     try {
       await deleteUser(Number(id));
@@ -78,7 +90,6 @@ export function UserManagement() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       if (editingUser) {
         await updateUser(Number(editingUser.id), {
@@ -97,48 +108,16 @@ export function UserManagement() {
           active: formData.status === 'active',
         });
       }
-
       setIsModalOpen(false);
       resetForm();
 
       // recargar lista
       const refreshed = await getUsers();
       setUsers(refreshed.map(mapApiUserToAppUser));
-
     } catch (e) {
       console.error("Error guardando usuario", e);
       toast.error("Error al guardar usuario");
     }
-  };
-
-  const getRoleLabel = (role: string) => {
-    const roles: { [key: string]: string } = {
-      admin: 'Administrador',
-      manager: 'Gerente',
-      operator: 'Operador',
-      auditor: 'Auditor'
-    };
-    return roles[role] || role;
-  };
-
-  const getRoleBadgeColor = (role: string) => {
-    const colors: { [key: string]: string } = {
-      admin: 'bg-purple-100 text-purple-800',
-      manager: 'bg-blue-100 text-blue-800',
-      operator: 'bg-green-100 text-green-800',
-      auditor: 'bg-gray-100 text-gray-800'
-    };
-    return colors[role] || 'bg-gray-100 text-gray-800';
-  };
-
-  const getRolePermissions = (role: string) => {
-    const permissions: { [key: string]: string[] } = {
-      admin: ['Acceso completo', 'Gestión de usuarios', 'Reportes', 'Configuración'],
-      manager: ['Dashboard', 'Gestión de inventario', 'Movimientos', 'Reportes'],
-      operator: ['Dashboard', 'Ver inventario', 'Ver movimientos'],
-      auditor: ['Dashboard', 'Ver inventario', 'Ver movimientos', 'Reportes']
-    };
-    return permissions[role] || [];
   };
 
   return (
@@ -168,30 +147,16 @@ export function UserManagement() {
           <p className="text-sm text-gray-600">Total Usuarios</p>
           <p className="text-2xl font-bold text-gray-900 mt-1">{users.length}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Administradores</p>
-          <p className="text-2xl font-bold text-purple-600 mt-1">
-            {users.filter(u => u.role === 'admin').length}
-          </p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Gerentes</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">
-            {users.filter(u => u.role === 'manager').length}
-          </p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Operadores</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
-            {users.filter(u => u.role === 'operator').length}
-          </p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Auditor</p>
-          <p className="text-2xl font-bold text-gray-600 mt-1">
-            {users.filter(u => u.role === 'auditor').length}
-          </p>
-        </div>
+        {ALL_ROLES.map(role => (
+          <div key={role} className="bg-white rounded-lg shadow p-4">
+            <p className="text-sm text-gray-600">
+              {ROLE_CONFIG[role].label}
+            </p>
+            <p className="text-2xl font-bold mt-1">
+              {users.filter(u => u.role === role).length}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Tabla de usuarios */}
@@ -237,8 +202,8 @@ export function UserManagement() {
                     {user.email}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleBadgeColor(user.role)}`}>
-                      {getRoleLabel(user.role)}
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${ROLE_CONFIG[user.role].color}`}>
+                      {ROLE_CONFIG[user.role].label}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -253,6 +218,18 @@ export function UserManagement() {
                     {new Date(user.createdAt).toLocaleDateString('es-ES')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                    <button
+                      onClick={() => handleToggleUser(user.id, user.status === 'inactive')}
+                      className="text-gray-600 hover:text-gray-900 mr-3"
+                      title={user.status === 'active' ? 'Desactivar usuario' : 'Activar usuario'}
+                    >
+                      {user.status === 'active' ? (
+                        <X className="w-4 h-4" />
+                      ) : (
+                        <Check className="w-4 h-4" />
+                      )}
+                    </button>
+
                     <button
                       onClick={() => handleEdit(user)}
                       className="text-blue-600 hover:text-blue-900 mr-3"
@@ -281,66 +258,28 @@ export function UserManagement() {
 
       {/* Información de permisos por rol */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Shield className="w-5 h-5 text-purple-600" />
-            <h3 className="font-semibold text-gray-900">Administrador</h3>
-          </div>
-          <ul className="space-y-2">
-            {getRolePermissions('admin').map((perm, index) => (
-              <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-purple-600 rounded-full" />
-                {perm}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {ALL_ROLES_LIST.map(role => (
+          <div key={role} className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Shield className="w-5 h-5 text-gray-700" />
+              <h3 className="font-semibold text-gray-900 capitalize">
+                {role}
+              </h3>
+            </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Shield className="w-5 h-5 text-blue-600" />
-            <h3 className="font-semibold text-gray-900">Gerente</h3>
+            <ul className="space-y-2">
+              {getAccessibleViewsForRole(role).map((label, index) => (
+                <li
+                  key={index}
+                  className="text-sm text-gray-600 flex items-center gap-2"
+                >
+                  <div className="w-1.5 h-1.5 bg-gray-600 rounded-full" />
+                  {label}
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="space-y-2">
-            {getRolePermissions('manager').map((perm, index) => (
-              <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
-                {perm}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Shield className="w-5 h-5 text-green-600" />
-            <h3 className="font-semibold text-gray-900">Operador</h3>
-          </div>
-          <ul className="space-y-2">
-            {getRolePermissions('operator').map((perm, index) => (
-              <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-600 rounded-full" />
-                {perm}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Shield className="w-5 h-5 text-gray-600" />
-            <h3 className="font-semibold text-gray-900">Auditor</h3>
-          </div>
-          <ul className="space-y-2">
-            {getRolePermissions('auditor').map((perm, index) => (
-              <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-gray-600 rounded-full" />
-                {perm}
-              </li>
-            ))}
-          </ul>
-        </div>
-
+        ))}
       </div>
 
       <div className="h-12" />
@@ -426,14 +365,12 @@ export function UserManagement() {
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="operator">Operador</option>
-                  <option value="manager">Gerente</option>
-                  <option value="admin">Administrador</option>
-                  <option value="auditor">Auditor</option>
+                  {ALL_ROLES.map(role => (
+                    <option key={role} value={role}>
+                      {ROLE_CONFIG[role].label}
+                    </option>
+                  ))}
                 </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  Permisos: {getRolePermissions(formData.role).join(', ')}
-                </p>
               </div>
 
               <div>

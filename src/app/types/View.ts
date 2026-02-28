@@ -14,8 +14,7 @@ export type View =
   | 'report-incident'
   | 'audit-inventory'
   | 'audit-movements'
-  | 'audit-reports'
-  | 'export-audit';
+  | 'audit-reports';
 
 
   export interface ViewConfig {
