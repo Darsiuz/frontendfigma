@@ -1,24 +1,22 @@
 import { Package, TrendingUp, AlertTriangle, Activity, DollarSign, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { motion } from "motion/react";
 
-import type { Product } from '@/app/types/Product';
 import { MovementStatus, MovementType, type Movement } from '@/app/types/Movement';
-import type { SystemConfig } from '@/app/types/SystemConfig';
-import { Incident, IncidentStatus } from '../types/Incident';
-import { User } from '../types/User';
-import { canViewIncidents, canViewMovements } from '../utils/permissions';
+import { useAppContext } from '@/app/context/AppContext';
+import { IncidentStatus } from '@/app/types/Incident';
+import { canViewIncidents, canViewMovements } from '@/app/utils/permissions';
 import { getCurrencySymbol } from '@/app/utils/currency';
 
-interface DashboardViewProps {
-  products: Product[];
-  movements: Movement[];
-  incidents: Incident[];
-  systemConfig: SystemConfig | null;
-  user: User;
-}
+// interface DashboardViewProps {
+//   products: Product[];
+//   movements: Movement[];
+//   incidents: Incident[];
+//   user: User;
+// }
 
-export function DashboardView({ products, movements, systemConfig, incidents, user }: DashboardViewProps) {
+export function DashboardView() {
+  const { currentUser: user, systemConfig, products, movements, incidents } = useAppContext();
   const totalProducts = products.length;
   const totalUnits = products.reduce((sum, p) => sum + p.quantity, 0);
   const totalValue = products.reduce((sum, p) => sum + (p.quantity * p.price), 0);

@@ -1,21 +1,22 @@
 import { useState } from 'react';
-import { Search, Plus, Edit, Trash2, Package, Filter } from 'lucide-react';
-import { User } from '@/app/types/User';
+import { Search, Plus, Edit, Trash2, Package } from 'lucide-react';
 import { Product } from '@/app/types/Product';
 import { canCreateProduct, canEditProduct, canDeleteProduct } from '@/app/utils/permissions';
+import { getCurrencySymbol } from '@/app/utils/currency';
+import { useAppContext } from '@/app/context/AppContext';
 
 interface InventoryManagementProps {
-  products: Product[];
   onEdit: (product: Product) => void;
   onDelete: (id: number) => void;
   onAdd: () => void;
-  user: User;
 }
 
-export function InventoryManagement({ products, onEdit, onDelete, onAdd, user }: InventoryManagementProps) {
+export function InventoryManagement({ onEdit, onDelete, onAdd }: InventoryManagementProps) {
+  const { systemConfig, products, currentUser: user } = useAppContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [stockFilter, setStockFilter] = useState('all');
+  const currencySymbol = getCurrencySymbol(systemConfig?.currency);
 
   const categories = ['all', ...new Set(products.map(p => p.category))];
 
@@ -103,7 +104,7 @@ export function InventoryManagement({ products, onEdit, onDelete, onAdd, user }:
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-sm text-gray-600">Valor Total</p>
           <p className="text-2xl font-bold text-gray-900 mt-1">
-            ${filteredProducts.reduce((sum, p) => sum + (p.quantity * p.price), 0).toLocaleString()}
+            {currencySymbol} {filteredProducts.reduce((sum, p) => sum + (p.quantity * p.price), 0).toLocaleString()}
           </p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
@@ -186,10 +187,10 @@ export function InventoryManagement({ products, onEdit, onDelete, onAdd, user }:
                       <div className="text-xs text-gray-500">Mín: {product.minStock}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${product.price.toLocaleString()}
+                      {currencySymbol} {product.price.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      ${(product.quantity * product.price).toLocaleString()}
+                      {currencySymbol} {(product.quantity * product.price).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {product.quantity <= product.minStock ? (
@@ -224,8 +225,6 @@ export function InventoryManagement({ products, onEdit, onDelete, onAdd, user }:
                             <Trash2 className="w-4 h-4" />
                           </button>
                         )}
-
-
                       </td>
                     )}
                   </tr>

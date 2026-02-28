@@ -1,45 +1,44 @@
-import type { User } from '@/app/types/User';
+import type { User as U } from '@/app/types/User';
 import type { View } from '@/app/types/View';
-
+import { ADMIN, MANAGER, OPERATOR, AUDITOR } from '@/app/utils/permissions';
 
 // ACA SE DEFINE QUIEN PUEDE VER CADA ITEM DEL SIDEBAR, ESTO SE HACE EN BASE AL ROL DEL USUARIO
-export const canAccessView = (user: User, view: View): boolean => {
+export const canAccessView = (u: U, view: View): boolean => {
   switch (view) {
     // Dashboard
     case 'dashboard':
-      // return true; // esto es que es visto por todos
-      return user.role === 'admin' || user.role === 'manager' || user.role === 'operator';
+      return ADMIN(u) || MANAGER(u) || OPERATOR(u);
 
     // Admin
     case 'inventory':
     case 'users':
     case 'settings':
     case 'reports':
-      return user.role === 'admin';
+      return ADMIN(u);
 
     // Manager
     case 'supervise':
     case 'manager-reports':
-      return user.role === 'manager';
+      return MANAGER(u);
 
     case 'approve':
-      return user.role === 'admin' || user.role === 'manager';
+      return ADMIN(u) || MANAGER(u);
 
     case 'incidents':
-      return user.role === 'manager';
+      return MANAGER(u);
 
     // Operator
     case 'register-movements':
     case 'consult-inventory':
     case 'report-incident':
-      return user.role === 'operator';
+      return OPERATOR(u);
 
     // Auditor
     case 'audit-inventory':
     case 'audit-movements':
     case 'audit-reports':
     case 'export-audit':
-      return user.role === 'auditor';
+      return AUDITOR(u);
 
     default:
       return false;

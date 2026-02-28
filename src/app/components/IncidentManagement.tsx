@@ -1,19 +1,16 @@
 import { useState } from 'react';
 import { AlertTriangle, Plus, X, Clock, CheckCircle, XCircle } from 'lucide-react';
-import type { User } from '@/app/types/User';
-import type { Product } from '@/app/types/Product';
 import { IncidentStatus, type Incident } from '@/app/types/Incident';
 import { canCreateIncident, canResolveIncident } from '@/app/utils/permissions';
+import { useAppContext } from '@/app/context/AppContext';
 
 interface IncidentManagementProps {
-  products: Product[];
-  incidents: Incident[];
   onAddIncident: (incident: Omit<Incident, 'id' | 'reportedAt' | 'reportedBy' | 'status' | 'productName'>) => void;
   onResolveIncident: (id: string, status: IncidentStatus) => void;
-  user: User;
 }
 
-export function IncidentManagement({ products, incidents, onAddIncident, onResolveIncident, user }: IncidentManagementProps) {
+export function IncidentManagement({ onAddIncident, onResolveIncident }: IncidentManagementProps) {
+  const { products, incidents, currentUser: user } = useAppContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [formData, setFormData] = useState({
@@ -150,7 +147,7 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
         </div>
       </div>
 
-      {/* Estadísticas */}
+      {/* Estadisticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-sm text-gray-600">Total Incidencias</p>
@@ -330,17 +327,11 @@ export function IncidentManagement({ products, incidents, onAddIncident, onResol
               </div>
 
               <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
+                <button type="button" onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
                   Cancelar
                 </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-                >
+                <button type="submit" className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
                   Registrar Incidencia
                 </button>
               </div>

@@ -7,8 +7,8 @@ export const VIEWS_CONFIG: ViewConfig[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
 
   // Admin
-  { id: 'inventory', label: 'Gestionar Inventario', icon: Package },
   { id: 'users', label: 'Gestionar Usuarios', icon: Users },
+  { id: 'inventory', label: 'Gestionar Inventario', icon: Package },
   { id: 'reports', label: 'Reportes Generales', icon: FileText },
 
   // Manager
@@ -23,10 +23,9 @@ export const VIEWS_CONFIG: ViewConfig[] = [
   { id: 'report-incident', label: 'Registrar Incidencias', icon: AlertTriangle },
 
   // Auditor
-  { id: 'export-audit', label: 'Exportar para Auditoria', icon: FileText },
+  { id: 'audit-reports', label: 'Generar Reportes', icon: FileText },
   { id: 'audit-inventory', label: 'Consultar Inventario', icon: Package },
   { id: 'audit-movements', label: 'Historial de Movimientos', icon: TrendingUp },
-  { id: 'audit-reports', label: 'Generar Reportes', icon: FileText },
 
   
   { id: 'settings', label: 'Configuracion Sistema', icon: Settings },

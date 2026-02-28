@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { Clock, CheckCircle, XCircle, ArrowUpCircle, ArrowDownCircle, Filter } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import { Movement, MovementStatus, MovementFilter, MovementType } from '@/app/types/Movement';
+import { useAppContext } from '@/app/context/AppContext';
 
 interface ApproveMovementsProps {
-  movements: Movement[];
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
 }
 
-export function ApproveMovements({ movements, onApprove, onReject }: ApproveMovementsProps) {
+export function ApproveMovements({ onApprove, onReject }: ApproveMovementsProps) {
   const [filter, setFilter] = useState<MovementFilter>('all'); // FALTA REVISAR SI SE DEBE INICIALIZAR EN PENDIENTE O EN ALL
+  const { movements } = useAppContext();
 
   const filteredMovements = movements.filter(m => {
     if (filter === 'all') return true;
@@ -36,10 +37,19 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
       <div className="bg-white rounded-lg shadow p-4">
         <div className="flex gap-2">
           <button
+            onClick={() => setFilter('all')}
+            className={`px-4 py-2 rounded-lg transition-colors ${filter === 'all'
+              ? 'bg-blue-100 text-blue-700'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+          >
+            Todos
+          </button>
+          <button
             onClick={() => setFilter(MovementStatus.PENDIENTE)}
             className={`px-4 py-2 rounded-lg transition-colors ${filter === MovementStatus.PENDIENTE
-                ? 'bg-yellow-100 text-yellow-700'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-yellow-100 text-yellow-700'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
           >
             Pendientes ({pendingCount})
@@ -47,8 +57,8 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
           <button
             onClick={() => setFilter(MovementStatus.APROBADO)}
             className={`px-4 py-2 rounded-lg transition-colors ${filter === MovementStatus.APROBADO
-                ? 'bg-green-100 text-green-700'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-green-100 text-green-700'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
           >
             Aprobados ({approvedCount})
@@ -56,21 +66,13 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
           <button
             onClick={() => setFilter(MovementStatus.RECHAZADO)}
             className={`px-4 py-2 rounded-lg transition-colors ${filter === MovementStatus.RECHAZADO
-                ? 'bg-red-100 text-red-700'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-red-100 text-red-700'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
           >
             Rechazados ({rejectedCount})
           </button>
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg transition-colors ${filter === 'all'
-                ? 'bg-blue-100 text-blue-700'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-          >
-            Todos
-          </button>
+
         </div>
       </div>
 
@@ -119,16 +121,16 @@ export function ApproveMovements({ movements, onApprove, onReject }: ApproveMove
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold text-gray-900">{movement.productName}</h3>
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${movement.type === MovementType.ENTRADA
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
                           }`}>
                           {movement.type === MovementType.ENTRADA ? 'Entrada' : 'Salida'}
                         </span>
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${movement.status === MovementStatus.PENDIENTE
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : movement.status === MovementStatus.APROBADO
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : movement.status === MovementStatus.APROBADO
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
                           }`}>
                           {movement.status === MovementStatus.PENDIENTE ? 'Pendiente' :
                             movement.status === MovementStatus.APROBADO ? 'Aprobado' : 'Rechazado'}

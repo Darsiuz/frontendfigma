@@ -1,22 +1,21 @@
-import { LayoutDashboard, Package, TrendingUp, Users, FileText, LogOut, ChevronLeft, ChevronRight, Settings, AlertTriangle, CheckCircle, Edit } from 'lucide-react';
+import { Package, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { View } from '@/app/types/View';
-import { User } from '@/app/types/User';
 import { canAccessView } from '@/app/utils/sidebar.permissions';
 import { VIEWS_CONFIG } from '@/app/utils/views.config';
-import { SystemConfig } from '../types/SystemConfig';
 import { motion } from 'motion/react';
+import { useAppContext } from '@/app/context/AppContext';
 
 interface SidebarProps {
   currentView: View;
   onNavigate: (view: View) => void;
-  user: User;
   onLogout: () => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
-  systemConfig: SystemConfig | null;
 }
 
-export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, onToggleCollapse, systemConfig }: SidebarProps) {
+export function Sidebar({ currentView, onNavigate, onLogout, isCollapsed, onToggleCollapse }: SidebarProps) {
+  const { currentUser, systemConfig } = useAppContext();
+  const user = currentUser;
   const visibleMenuItems = VIEWS_CONFIG.filter(view => canAccessView(user, view.id));
 
   const getRoleLabel = (role: string) => {
@@ -141,6 +140,21 @@ export function Sidebar({ currentView, onNavigate, user, onLogout, isCollapsed, 
           );
         })}
       </nav>
+
+      {/* System Version */}
+      <div className="px-4 pb-2">
+        {!isCollapsed && (
+          <motion.p
+            key={__APP_VERSION__}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 10.0 }}
+            className="text-xs text-gray-400"
+          >
+            v {__APP_VERSION__}
+          </motion.p>
+        )}
+      </div>
 
       {/* Logout button */}
       <div className="p-4 border-t border-gray-200">

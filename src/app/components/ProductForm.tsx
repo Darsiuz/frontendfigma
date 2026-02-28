@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Product } from '@/app/types/Product';
+import { getCurrencySymbol } from '../utils/currency';
+import { useAppContext } from '@/app/context/AppContext';
 
 
 interface ProductFormProps {
@@ -12,6 +14,8 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ isOpen, onClose, onSave, editProduct, formErrors }: ProductFormProps) {
+  const { systemConfig } = useAppContext();
+  const currencySymbol = getCurrencySymbol(systemConfig?.currency);
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -43,11 +47,6 @@ export function ProductForm({ isOpen, onClose, onSave, editProduct, formErrors }
     }
   }, [editProduct, isOpen]);
 
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   onSave(formData);
-  //   onClose();
-  // };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
@@ -162,7 +161,7 @@ export function ProductForm({ isOpen, onClose, onSave, editProduct, formErrors }
               Precio Unitario *
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">{currencySymbol}</span>
               <input
                 type="number"
                 required

@@ -1,24 +1,26 @@
-import { useState } from 'react';
-import { Download, FileText, TrendingUp, Package, DollarSign, Calendar } from 'lucide-react';
+import { Download, FileText, TrendingUp, Package, DollarSign } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend, PieChart, Pie, Cell } from 'recharts';
-import type { Product } from '@/app/types/Product';
-import { MovementType, type Movement } from '@/app/types/Movement';
+import { MovementStatus, MovementType } from '@/app/types/Movement';
+import { getCurrencySymbol } from '@/app/utils/currency';
+import { useAppContext } from '../context/AppContext';
 
-interface ReportsProps {
-  products: Product[];
-  movements: Movement[];
-}
+// interface ReportsProps {
+//   products: Product[];
+//   movements: Movement[];
+// }
 
-export function Reports({ products, movements }: ReportsProps) {
-  const [reportType, setReportType] = useState('inventory');
-  const [dateRange, setDateRange] = useState('month');
+export function Reports() {
+  //mm es para no confundir el contexto con el estado local de movimientos que se usará para los calculos de reportes.
+  const { systemConfig, products, movements: mm } = useAppContext();
+  const movements = mm.filter(m => m.status === MovementStatus.APROBADO);
 
-  // Cálculos de reportes
+  const currencySymbol = getCurrencySymbol(systemConfig?.currency);
+  // Calculos de reportes
   const totalValue = products.reduce((sum, p) => sum + (p.quantity * p.price), 0);
   const totalProducts = products.length;
   const lowStockCount = products.filter(p => p.quantity <= p.minStock).length;
 
-  // Productos por categoría
+  // Productos por categoria
   const categoryReport = products.reduce((acc: any[], product) => {
     const existing = acc.find(item => item.category === product.category);
     if (existing) {
@@ -41,7 +43,7 @@ export function Reports({ products, movements }: ReportsProps) {
     const date = new Date(mov.date);
     const monthYear = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short' });
     const existing = acc.find(item => item.month === monthYear);
-    
+
     if (existing) {
       if (mov.type === MovementType.ENTRADA) {
         existing.entradas += mov.quantity;
@@ -58,7 +60,7 @@ export function Reports({ products, movements }: ReportsProps) {
     return acc;
   }, []);
 
-  // Top 10 productos más movidos
+  // Top 10 productos mas movidos
   const productMovements = movements.reduce((acc: any, mov) => {
     if (!acc[mov.productId]) {
       acc[mov.productId] = {
@@ -192,7 +194,7 @@ export function Reports({ products, movements }: ReportsProps) {
             <DollarSign className="w-8 h-8 opacity-80" />
           </div>
           <p className="text-sm opacity-90">Valor Total</p>
-          <p className="text-3xl font-bold mt-1">${totalValue.toLocaleString()}</p>
+          <p className="text-3xl font-bold mt-1">{currencySymbol} {totalValue.toLocaleString()}</p>
         </div>
 
         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow p-6 text-white">
@@ -212,7 +214,7 @@ export function Reports({ products, movements }: ReportsProps) {
         </div>
       </div>
 
-      {/* Gráficos de análisis */}
+      {/* Graficos de analisis */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Movimientos mensuales */}
         <div className="bg-white rounded-lg shadow p-6">
@@ -230,7 +232,7 @@ export function Reports({ products, movements }: ReportsProps) {
           </ResponsiveContainer>
         </div>
 
-        {/* Valor por categoría */}
+        {/* Valor por categoria */}
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Valor por Categoría</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -240,7 +242,7 @@ export function Reports({ products, movements }: ReportsProps) {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ category, value }) => `${category}: $${value.toLocaleString()}`}
+                label={({ category, value }) => `${category}: ${currencySymbol} ${value.toLocaleString()}`}
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"
@@ -249,7 +251,7 @@ export function Reports({ products, movements }: ReportsProps) {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: any) => `$${value.toLocaleString()}`} />
+              <Tooltip formatter={(value: any) => `${currencySymbol} ${value.toLocaleString()}`} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -262,13 +264,13 @@ export function Reports({ products, movements }: ReportsProps) {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
-              <Tooltip formatter={(value: any) => `$${value.toLocaleString()}`} />
+              <Tooltip formatter={(value: any) => `${currencySymbol} ${value.toLocaleString()}`} />
               <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} name="Valor Total" />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Top productos más movidos */}
+        {/* Top productos mas movidos */}
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Top 10 Productos Más Movidos</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -283,7 +285,7 @@ export function Reports({ products, movements }: ReportsProps) {
         </div>
       </div>
 
-      {/* Tabla de reporte por categorías */}
+      {/* Tabla de reporte por categorias */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">Reporte Detallado por Categoría</h3>
@@ -318,7 +320,7 @@ export function Reports({ products, movements }: ReportsProps) {
                     {category.units.toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    ${category.value.toLocaleString()}
+                    {currencySymbol} {category.value.toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {((category.value / totalValue) * 100).toFixed(1)}%
@@ -334,7 +336,7 @@ export function Reports({ products, movements }: ReportsProps) {
                   {products.reduce((sum, p) => sum + p.quantity, 0).toLocaleString()}
                 </td>
                 <td className="px-6 py-4 font-semibold text-gray-900">
-                  ${totalValue.toLocaleString()}
+                  {currencySymbol} {totalValue.toLocaleString()}
                 </td>
                 <td className="px-6 py-4 font-semibold text-gray-900">100%</td>
               </tr>

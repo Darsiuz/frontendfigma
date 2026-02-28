@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { Settings, Save, RotateCcw } from 'lucide-react';
 import { SystemConfig } from '@/app/types/SystemConfig';
 import { toast } from "sonner";
+import { useAppContext } from '../context/AppContext';
 
 interface SystemSettingsProps {
-  config: SystemConfig | null;
   onSave: (config: SystemConfig) => void;
 }
 
-export function SystemSettings({ config, onSave }: SystemSettingsProps) {
+export function SystemSettings({ onSave }: SystemSettingsProps) {
+  const { systemConfig: config } = useAppContext();
   const [formData, setFormData] = useState<SystemConfig | null>(config);
   const [hasChanges, setHasChanges] = useState(false);
 

@@ -1,18 +1,17 @@
 import { useState } from 'react';
-import { Plus, ArrowUpCircle, ArrowDownCircle, X, Calendar, Filter, Download, Activity } from 'lucide-react';
-import { Product } from '@/app/types/Product';
+import { Plus, ArrowUpCircle, ArrowDownCircle, X, Calendar, Download, Activity } from 'lucide-react';
 import { Movement, MovementStatus, MovementType } from '@/app/types/Movement';
-import { User } from '@/app/types/User';
-import { canCreateMovement } from '@/app/utils/permissions';
+import { canApproveMovement, canCreateMovement } from '@/app/utils/permissions';
+import { useAppContext } from '@/app/context/AppContext';
 
 interface StockMovementsProps {
-  products: Product[];
-  movements: Movement[];
   onAddMovement: (movement: Omit<Movement, 'id' | 'date' | 'productName' | 'user' | 'status'>) => void;
-  user: User;
 }
 
-export function StockMovements({ products, movements, onAddMovement, user }: StockMovementsProps) {
+export function StockMovements({ onAddMovement }: StockMovementsProps) {
+  const { currentUser: user, products, movements: mm } = useAppContext();
+  const movements = !canCreateMovement(user) && !canApproveMovement(user) ? mm.filter(m => m.status === MovementStatus.APROBADO) : mm;
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     productId: 0,
@@ -24,8 +23,6 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
   const [dateFilter, setDateFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Admin, Manager y Operator pueden registrar movimientos
-  // const canEdit = user.role === 'admin' || user.role === 'manager' || user.role === 'operator';
   const canCreate = canCreateMovement(user);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -45,14 +42,14 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
   const filteredMovements = movements.filter(movement => {
     const matchesType = typeFilter === 'all' || movement.type === typeFilter;
     const matchesSearch = movement.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         movement.reason.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         movement.user.toLowerCase().includes(searchTerm.toLowerCase());
-    
+      movement.reason.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      movement.user.toLowerCase().includes(searchTerm.toLowerCase());
+
     let matchesDate = true;
     if (dateFilter !== 'all') {
       const movDate = new Date(movement.date);
       const today = new Date();
-      
+
       if (dateFilter === 'today') {
         matchesDate = movDate.toDateString() === today.toDateString();
       } else if (dateFilter === 'week') {
@@ -63,11 +60,11 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
         matchesDate = movDate >= monthAgo;
       }
     }
-    
+
     return matchesType && matchesDate && matchesSearch;
   });
 
-  const sortedMovements = [...filteredMovements].sort((a, b) => 
+  const sortedMovements = [...filteredMovements].sort((a, b) =>
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
@@ -89,12 +86,12 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
       m.reason,
       m.user
     ]);
-    
+
     const csvContent = [
       headers.join(','),
       ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
     ].join('\n');
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -201,9 +198,8 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
               <div key={movement.id} className="p-4 hover:bg-gray-50 transition-colors">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-1">
-                    <div className={`rounded-full p-2 mt-1 ${
-                      movement.type === MovementType.ENTRADA ? 'bg-green-100' : 'bg-red-100'
-                    }`}>
+                    <div className={`rounded-full p-2 mt-1 ${movement.type === MovementType.ENTRADA ? 'bg-green-100' : 'bg-red-100'
+                      }`}>
                       {movement.type === MovementType.ENTRADA ? (
                         <ArrowUpCircle className="w-5 h-5 text-green-600" />
                       ) : (
@@ -213,23 +209,21 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-medium text-gray-900">{movement.productName}</h4>
-                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                          movement.type === MovementType.ENTRADA 
-                            ? 'bg-green-100 text-green-800' 
+                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${movement.type === MovementType.ENTRADA
+                            ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
-                        }`}>
+                          }`}>
                           {movement.type === MovementType.ENTRADA ? 'Entrada' : 'Salida'}
                         </span>
                         {movement.status && (
-                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                            movement.status === MovementStatus.PENDIENTE
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${movement.status === MovementStatus.PENDIENTE
                               ? 'bg-yellow-100 text-yellow-800'
                               : movement.status === MovementStatus.APROBADO
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {movement.status === MovementStatus.PENDIENTE ? 'Pendiente' : 
-                             movement.status === MovementStatus.APROBADO ? 'Aprobado' : 'Rechazado'}
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                            {movement.status === MovementStatus.PENDIENTE ? 'Pendiente' :
+                              movement.status === MovementStatus.APROBADO ? 'Aprobado' : 'Rechazado'}
                           </span>
                         )}
                       </div>
@@ -255,9 +249,8 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`text-xl font-bold ${
-                      movement.type === MovementType.ENTRADA ? 'text-green-600' : 'text-red-600'
-                    }`}>
+                    <p className={`text-xl font-bold ${movement.type === MovementType.ENTRADA ? 'text-green-600' : 'text-red-600'
+                      }`}>
                       {movement.type === MovementType.ENTRADA ? '+' : '-'}{movement.quantity}
                     </p>
                     <p className="text-xs text-gray-500">unidades</p>
@@ -311,11 +304,10 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, type: MovementType.ENTRADA })}
-                    className={`flex items-center justify-center gap-2 px-4 py-3 border rounded-lg transition-all ${
-                      formData.type === MovementType.ENTRADA
+                    className={`flex items-center justify-center gap-2 px-4 py-3 border rounded-lg transition-all ${formData.type === MovementType.ENTRADA
                         ? 'border-green-600 bg-green-50 text-green-700'
                         : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <ArrowUpCircle className="w-5 h-5" />
                     Entrada
@@ -323,11 +315,10 @@ export function StockMovements({ products, movements, onAddMovement, user }: Sto
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, type: MovementType.SALIDA })}
-                    className={`flex items-center justify-center gap-2 px-4 py-3 border rounded-lg transition-all ${
-                      formData.type === MovementType.SALIDA
+                    className={`flex items-center justify-center gap-2 px-4 py-3 border rounded-lg transition-all ${formData.type === MovementType.SALIDA
                         ? 'border-red-600 bg-red-50 text-red-700'
                         : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <ArrowDownCircle className="w-5 h-5" />
                     Salida

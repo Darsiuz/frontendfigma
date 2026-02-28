@@ -13,7 +13,7 @@ export const getDefaultViewByRole = (user: User): View => {
       return 'dashboard';
 
     case 'auditor':
-      return 'export-audit';
+      return 'audit-reports';
 
     default:
       return 'dashboard';
