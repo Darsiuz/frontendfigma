@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Product } from '@/app/types/Product';
-import { getCurrencySymbol } from '../utils/currency';
+import { getCurrencySymbol } from '@/app/utils/currency';
 import { useAppContext } from '@/app/context/AppContext';
-
+import { FormField } from '@/app/components/forms/FormField';
+import { Input } from '@/app/components/forms/Input';
 
 interface ProductFormProps {
   isOpen: boolean;
@@ -47,13 +48,9 @@ export function ProductForm({ isOpen, onClose, onSave, editProduct, formErrors }
     }
   }, [editProduct, isOpen]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
-  };
+  const handleSubmit = async (e: React.FormEvent) => { e.preventDefault(); onSave(formData); };
 
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -61,161 +58,72 @@ export function ProductForm({ isOpen, onClose, onSave, editProduct, formErrors }
           <h2 className="text-xl font-semibold text-gray-900">
             {editProduct ? 'Editar Producto' : 'Nuevo Producto'}
           </h2>
-          <button
-            onClick={onClose}
+          <button onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X className="w-6 h-6" />
+          ><X className="w-6 h-6" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre del Producto *
-            </label>
-            <input
-              type="text"
-              required
+          <FormField label="Nombre del Producto *" error={formErrors?.name}>
+            <Input type="text" required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 
-                ${formErrors?.name ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
-              `}
               placeholder="Ej: Laptop HP"
+              error={formErrors?.name}
             />
-            {formErrors?.name && (
-              <p className="text-red-500 text-sm mt-1">
-                {formErrors.name}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Categoría *
-            </label>
-            <input
-              type="text"
-              required
+          </FormField>
+          <FormField label="Categoría *" error={formErrors?.category}>
+            <Input type="text" required
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 
-                ${formErrors?.category ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
-              `}
               placeholder="Ej: Electrónica"
+              error={formErrors?.category}
             />
-            {formErrors?.category && (
-              <p className="text-red-500 text-sm mt-1">
-                {formErrors.category}
-              </p>
-            )}
-          </div>
-
+          </FormField>
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Cantidad *
-              </label>
-              <input
-                type="number"
-                required
-                min="0"
+            <FormField label="Cantidad *" error={formErrors?.quantity}>
+              <Input type="number" required min="0"
                 value={formData.quantity}
                 onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 
-                  ${formErrors?.quantity ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
-                `}
+                error={formErrors?.quantity}
               />
-              {formErrors?.quantity && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.quantity}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Stock Mínimo *
-              </label>
-              <input
-                type="number"
-                required
-                min="0"
+            </FormField>
+            <FormField label="Stock Mínimo *" error={formErrors?.minStock}>
+              <Input type="number" required min="0"
                 value={formData.minStock}
                 onChange={(e) => setFormData({ ...formData, minStock: parseInt(e.target.value) || 0 })}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 
-                  ${formErrors?.minStock ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
-                `}
+                error={formErrors?.minStock}
               />
-              {formErrors?.minStock && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.minStock}
-                </p>
-              )}
-            </div>
+            </FormField>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Precio Unitario *
-            </label>
+          <FormField label="Precio Unitario *" error={formErrors?.price}>
             <div className="relative">
               <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">{currencySymbol}</span>
-              <input
-                type="number"
-                required
-                min="0"
-                step="0.01"
+              <Input type="number" required min="0" step="0.01" placeholder="0.00"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 
-                  ${formErrors?.price ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
-                `}
-                placeholder="0.00"
+                className={`pl-8 pr-3`}
+                error={formErrors?.price}
               />
-              {formErrors?.price && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.price}
-                </p>
-              )}
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Ubicación *
-            </label>
-            <input
-              type="text"
-              required
+          </FormField>
+          <FormField label="Ubicación" error={formErrors?.location}>
+            <Input type="text"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 
-                ${formErrors?.location ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
-              `}
               placeholder="Ej: Pasillo A, Estante 3"
+              error={formErrors?.location}
             />
-            {formErrors?.location && (
-              <p className="text-red-500 text-sm mt-1">
-                {formErrors.location}
-              </p>
-            )}
-          </div>
-
+          </FormField>
           <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
+            <button type="button" onClick={onClose}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancelar
+            >Cancelar
             </button>
-            <button
-              type="submit"
+            <button type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              {editProduct ? 'Guardar Cambios' : 'Crear Producto'}
+            >{editProduct ? 'Guardar Cambios' : 'Crear Producto'}
             </button>
           </div>
         </form>

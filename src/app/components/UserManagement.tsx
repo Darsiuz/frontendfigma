@@ -5,6 +5,8 @@ import type { AppUser, ApiUser } from '@/app/types/User';
 import { getAccessibleViewsForRole, ALL_ROLES_LIST } from '@/app/utils/roleDescriptions';
 import { toast } from "sonner";
 import { ALL_ROLES, ROLE_CONFIG } from "../utils/role.config";
+import { Input } from "./forms/Input";
+import { FormField } from "./forms/FormField";
 
 export function UserManagement() {
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -141,7 +143,6 @@ export function UserManagement() {
       </div>
 
       {/* Estadísticas */}
-
       <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         <div className="bg-white rounded-lg shadow p-4 md:col-span-2">
           <p className="text-sm text-gray-600">Total Usuarios</p>
@@ -303,57 +304,37 @@ export function UserManagement() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre Completo *
-                </label>
+            <form onSubmit={handleSubmit} className="p-6 space-y-4" autoComplete="off">
+              <FormField label="Nombre Completo *">
                 <div className="relative">
                   <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    required
+                  <Input type="text" required placeholder="Juan Pérez" className=" pl-10 "
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Juan Pérez"
                   />
                 </div>
-              </div>
+              </FormField>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Correo Electrónico *
-                </label>
+              <FormField label="Correo Electrónico *">
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="email"
-                    required
+                  <Input type="email" required placeholder="usuario@ejemplo.com" className=" pl-10 " autoComplete="off"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="usuario@ejemplo.com"
                   />
                 </div>
-              </div>
+              </FormField>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Contraseña *
-                </label>
+              <FormField label={editingUser ? "Contraseña (dejar en blanco para no cambiar)" : "Contraseña *"}>
                 <div className="relative">
                   <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="password"
-                    required={!editingUser}
+                  <Input type="password" required={!editingUser} className=" pl-10 " autoComplete="off"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder={editingUser ? "Dejar en blanco para no cambiar" : "Contraseña"}
                   />
                 </div>
-              </div>
+              </FormField>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -389,21 +370,14 @@ export function UserManagement() {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    resetForm();
-                  }}
+                <button type="button"
+                  onClick={() => { setIsModalOpen(false); resetForm(); }}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancelar
+                >Cancelar
                 </button>
-                <button
-                  type="submit"
+                <button type="submit"
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  {editingUser ? 'Guardar Cambios' : 'Crear Usuario'}
+                >{editingUser ? 'Guardar Cambios' : 'Crear Usuario'}
                 </button>
               </div>
             </form>
