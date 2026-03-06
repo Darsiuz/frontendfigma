@@ -81,4 +81,9 @@ Se implementa separacion clara entre:
   Para correr proyecto tienes que instalar la dependencia con `npm i`.
   Si sale un error al instalar dependencias puedes usar `npm audit fix` para corregirlo
   Luego correr el proyecto con `npm run dev`
+
+  Opcionalmente se puede crear un archivo .env 
+  dentro de `.env` :
+  `VITE_API_URL = "http://localhost:8080"`
+  en donde va la ruta que usarian para conectarse a la api, en este caso localhost:8080
   

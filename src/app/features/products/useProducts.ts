@@ -45,22 +45,24 @@ export function useProducts({ user }: UseProductsProps) {
   };
 
   // Editar producto
-  const handleEditProduct = async (
-    id: number,
-    productData: Omit<Product, "id">
-  ) => {
+  const handleEditProduct = async (id: number, productData: Omit<Product, "id">) => {
     try {
       const updated = await ProductService.updateProduct(id, productData);
 
       setProducts((prev) =>
         prev.map((p) => (p.id === updated.id ? updated : p))
       );
-
+      setFormErrors({});
       toast.success("Producto actualizado correctamente");
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || "Error actualizando producto"
-      );
+      const backendErrors = error?.response?.data?.errors;
+
+      if (backendErrors) {
+        setFormErrors(backendErrors);
+      } else {
+        toast.error(error?.response?.data?.message || "Error actualizando producto");
+      }
+      
     }
   };
 
@@ -84,5 +86,6 @@ export function useProducts({ user }: UseProductsProps) {
     handleEditProduct,
     handleDeleteProduct,
     formErrors,
+    setFormErrors,
   };
 }

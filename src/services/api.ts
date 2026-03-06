@@ -1,13 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://darsiuz.ddns.net:9191",
-  // baseURL: "http://localhost:8080",
-
-  // withCredentials: true,
-
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080",
 });
-
+console.log("Te conectaste a "+api.defaults.baseURL);
 // interceptor para JWT
 api.interceptors.request.use(config => {
   const token = localStorage.getItem("token");

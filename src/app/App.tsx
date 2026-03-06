@@ -31,7 +31,7 @@ function App() {
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  const { products, setProducts, handleAddProduct, handleEditProduct, handleDeleteProduct, formErrors } = useProducts({ user: currentUser });
+  const { products, setProducts, handleAddProduct, handleEditProduct, handleDeleteProduct, formErrors, setFormErrors } = useProducts({ user: currentUser });
   const { movements, handleAddMovement, handleApproveMovement, handleRejectMovement } = useMovements({ user: currentUser, products, setProducts });
   const { incidents, handleAddIncident, handleResolveIncident } = useIncidents({ user: currentUser });
   const { systemConfig, handleSaveConfig, } = useSystemConfig({ user: currentUser });
@@ -141,7 +141,7 @@ function App() {
 
         <ProductForm
           isOpen={isProductFormOpen}
-          onClose={() => { setIsProductFormOpen(false); setEditingProduct(null); }}
+          onClose={() => { setIsProductFormOpen(false); setEditingProduct(null); setFormErrors({}); }}
           onSave={(data) =>
             editingProduct
               ? handleEditProduct(editingProduct.id, data)
