@@ -8,13 +8,6 @@ import { IncidentStatus } from '@/app/types/Incident';
 import { canViewIncidents, canViewMovements } from '@/app/utils/permissions';
 import { getCurrencySymbol } from '@/app/utils/currency';
 
-// interface DashboardViewProps {
-//   products: Product[];
-//   movements: Movement[];
-//   incidents: Incident[];
-//   user: User;
-// }
-
 export function DashboardView() {
   const { currentUser: user, systemConfig, products, movements, incidents } = useAppContext();
   const totalProducts = products.length;

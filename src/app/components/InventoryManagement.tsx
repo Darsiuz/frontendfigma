@@ -4,6 +4,8 @@ import { Product } from '@/app/types/Product';
 import { canCreateProduct, canEditProduct, canDeleteProduct } from '@/app/utils/permissions';
 import { getCurrencySymbol } from '@/app/utils/currency';
 import { useAppContext } from '@/app/context/AppContext';
+import { Input } from './forms/Input';
+import { Select } from './forms/Select';
 
 interface InventoryManagementProps {
   onEdit: (product: Product) => void;
@@ -56,36 +58,23 @@ export function InventoryManagement({ onEdit, onDelete, onAdd }: InventoryManage
 
       {/* Filtros */}
       <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
+        <div className="flex flex-col md:flex-row gap-4 items-center">
+          <div className="flex-5 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <Input type="text" placeholder="Buscar productos..." value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)} className=' pl-10 ' />
           </div>
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
+          <Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className='flex-1'>
             <option value="all">Todas las categorías</option>
             {categories.filter(c => c !== 'all').map(category => (
               <option key={category} value={category}>{category}</option>
             ))}
-          </select>
-          <select
-            value={stockFilter}
-            onChange={(e) => setStockFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
+          </Select>
+          <Select value={stockFilter} onChange={(e) => setStockFilter(e.target.value)} className='flex-1'>
             <option value="all">Todos los stocks</option>
             <option value="low">Stock bajo</option>
             <option value="normal">Stock normal</option>
-          </select>
+          </Select>
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getUsers, createUser, updateUser, deleteUser, toggleUser } from "@/services/user.service";
+import { getUsers, createUser, updateUser, deleteUser, toggleUser } from "@/app/services/user.service";
 import { Plus, Edit, Trash2, X, Shield, Mail, User as UserIcon, Check } from 'lucide-react';
 import type { AppUser, ApiUser } from '@/app/types/User';
 import { getAccessibleViewsForRole, ALL_ROLES_LIST } from '@/app/utils/roleDescriptions';
@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { ALL_ROLES, ROLE_CONFIG } from "../utils/role.config";
 import { Input } from "./forms/Input";
 import { FormField } from "./forms/FormField";
+import { Select } from "./forms/Select";
 
 export function UserManagement() {
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -112,7 +113,7 @@ export function UserManagement() {
       }
       setIsModalOpen(false);
       resetForm();
-
+      toast.success(`Usuario ${editingUser ? 'actualizado' : 'creado'} correctamente`);
       // recargar lista
       const refreshed = await getUsers();
       setUsers(refreshed.map(mapApiUserToAppUser));
@@ -306,68 +307,46 @@ export function UserManagement() {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4" autoComplete="off">
               <FormField label="Nombre Completo *">
-                <div className="relative">
-                  <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <Input type="text" required placeholder="Juan Pérez" className=" pl-10 "
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </div>
+                <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Input type="text" required placeholder="Juan Pérez" className=" pl-10 "
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
               </FormField>
 
               <FormField label="Correo Electrónico *">
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <Input type="email" required placeholder="usuario@ejemplo.com" className=" pl-10 " autoComplete="off"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Input type="email" required placeholder="usuario@ejemplo.com" className=" pl-10 " autoComplete="new-email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
               </FormField>
 
               <FormField label={editingUser ? "Contraseña (dejar en blanco para no cambiar)" : "Contraseña *"}>
-                <div className="relative">
-                  <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <Input type="password" required={!editingUser} className=" pl-10 " autoComplete="off"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder={editingUser ? "Dejar en blanco para no cambiar" : "Contraseña"}
-                  />
-                </div>
+                <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Input type="password" required={!editingUser} className=" pl-10 " autoComplete="new-password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder={editingUser ? "Dejar en blanco para no cambiar" : "Contraseña"}
+                />
               </FormField>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Rol *
-                </label>
-                <select
-                  required
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
+              <FormField label="Rol *">
+                <Select required value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value as any })} >
                   {ALL_ROLES.map(role => (
-                    <option key={role} value={role}>
-                      {ROLE_CONFIG[role].label}
-                    </option>
+                    <option key={role} value={role}>{ROLE_CONFIG[role].label}</option>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </FormField>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Estado *
-                </label>
-                <select
-                  required
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
+              <FormField label="Estado">
+                <Select value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value as any })} >
                   <option value="active">Activo</option>
                   <option value="inactive">Inactivo</option>
-                </select>
-              </div>
+                </Select>
+              </FormField>
 
               <div className="flex gap-3 pt-4">
                 <button type="button"

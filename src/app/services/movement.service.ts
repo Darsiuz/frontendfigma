@@ -1,4 +1,4 @@
-import api from '@/services/api';
+import api from '@/app/services/api';
 import { Movement, MovementStatus } from '@/app/types/Movement';
 
 const mapStatus = (status?: string): MovementStatus =>

@@ -1,4 +1,3 @@
-
 export type View =
   | 'dashboard'
   | 'inventory'
@@ -17,7 +16,7 @@ export type View =
   | 'audit-reports';
 
 
-  export interface ViewConfig {
+export interface ViewConfig {
   id: View;
   label: string;
   icon: any;

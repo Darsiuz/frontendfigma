@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import type { SystemConfig } from "@/app/types/SystemConfig";
 import type { User } from "@/app/types/User";
 
-import * as SystemConfigService from "@/services/systemConfig.service";
+import * as SystemConfigService from "@/app/services/systemConfig.service";
 import { canViewSystemSettings, canEditSystemSettings } from "@/app/utils/permissions";
 
 interface UseSystemConfigProps {

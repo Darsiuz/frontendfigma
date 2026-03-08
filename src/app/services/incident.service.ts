@@ -1,4 +1,4 @@
-import api from '@/services/api';
+import api from '@/app/services/api';
 import { Incident, IncidentStatus } from '@/app/types/Incident';
 
 const mapStatus = (status?: string): IncidentStatus => {

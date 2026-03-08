@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 import type { User } from "@/app/types/User";
-import { login } from "@/services/auth.service";
-import { getDefaultViewByRole } from "@/app/utils/defaultViewByRole";
+import { login } from "@/app/services/auth.service";
 
 export function useAuth() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); 

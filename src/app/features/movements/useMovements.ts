@@ -1,7 +1,5 @@
-// src/app/features/movements/useMovements.ts
-
 import { useState, useEffect } from "react";
-import * as MovementService from "@/services/movement.service";
+import * as MovementService from "@/app/services/movement.service";
 import { Movement, MovementStatus, MovementType } from "@/app/types/Movement";
 import { Product } from "@/app/types/Product";
 import { User } from "@/app/types/User";

@@ -1,5 +1,4 @@
 export type IncidentType = 'daño' | 'pérdida' | 'robo' | 'vencimiento' | 'otro';
-// export type IncidentStatus = 'pendiente' | 'resuelto' | 'rechazado';
 export enum IncidentStatus {
     PENDIENTE = 'PENDIENTE',
     RESUELTO = 'RESUELTO',

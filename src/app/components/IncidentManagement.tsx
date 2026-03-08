@@ -3,6 +3,10 @@ import { AlertTriangle, Plus, X, Clock, CheckCircle, XCircle } from 'lucide-reac
 import { IncidentStatus, type Incident } from '@/app/types/Incident';
 import { canCreateIncident, canResolveIncident } from '@/app/utils/permissions';
 import { useAppContext } from '@/app/context/AppContext';
+import { FormField } from './forms/FormField';
+import { Select } from './forms/Select';
+import { Input } from './forms/Input';
+import { TextArea } from './forms/TextArea';
 
 interface IncidentManagementProps {
   onAddIncident: (incident: Omit<Incident, 'id' | 'reportedAt' | 'reportedBy' | 'status' | 'productName'>) => void;
@@ -19,7 +23,7 @@ export function IncidentManagement({ onAddIncident, onResolveIncident }: Inciden
     quantity: 0,
     description: '',
   });
-
+  const colorTheme = 'focus:ring-orange-500';
   const canCreate = canCreateIncident(user);
   const canResolve = canResolveIncident(user);
 
@@ -261,15 +265,9 @@ export function IncidentManagement({ onAddIncident, onResolveIncident }: Inciden
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Producto Afectado *
-                </label>
-                <select
-                  required
-                  value={formData.productId}
+              <FormField label="Producto Afectado *">
+                <Select required value={formData.productId} colortheme={colorTheme}
                   onChange={(e) => setFormData({ ...formData, productId: Number(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
                   <option value="">Seleccionar producto...</option>
                   {products.map(product => (
@@ -277,54 +275,34 @@ export function IncidentManagement({ onAddIncident, onResolveIncident }: Inciden
                       {product.name} (Stock: {product.quantity})
                     </option>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </FormField>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tipo de Incidencia *
-                </label>
-                <select
-                  required
-                  value={formData.type}
+              <FormField label="Tipo de Incidencia *">
+                <Select required value={formData.type} colortheme={colorTheme}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
+                  <option value="">Seleccionar tipo...</option>
                   <option value="daño">Daño en producto</option>
                   <option value="pérdida">Pérdida</option>
                   <option value="robo">Robo</option>
                   <option value="vencimiento">Vencimiento</option>
                   <option value="otro">Otro</option>
-                </select>
-              </div>
+                </Select>
+              </FormField>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cantidad Afectada *
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  value={formData.quantity}
+              <FormField label="Cantidad Afectada *">
+                <Input type="number" required min="1" value={formData.quantity} colortheme={colorTheme}
                   onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
-              </div>
+              </FormField>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descripción Detallada *
-                </label>
-                <textarea
-                  required
-                  value={formData.description}
+              <FormField label="Descripción Detallada *">
+                <TextArea required value={formData.description} colortheme={colorTheme} rows={4}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  rows={4}
                   placeholder="Describa detalladamente el incidente, cuándo ocurrió y las circunstancias..."
                 />
-              </div>
+              </FormField>
 
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={() => setIsModalOpen(false)}

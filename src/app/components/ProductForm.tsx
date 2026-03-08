@@ -98,15 +98,13 @@ export function ProductForm({ isOpen, onClose, onSave, editProduct, formErrors }
             </FormField>
           </div>
           <FormField label="Precio Unitario *" error={formErrors?.price}>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">{currencySymbol}</span>
-              <Input type="number" required min="0" step="0.01" placeholder="0.00"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                className={`pl-8 pr-3`}
-                error={formErrors?.price}
-              />
-            </div>
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">{currencySymbol}</span>
+            <Input type="number" required min="0" step="0.01" placeholder="0.00"
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+              className={`pl-8 pr-3`}
+              error={formErrors?.price}
+            />
           </FormField>
           <FormField label="Ubicación" error={formErrors?.location}>
             <Input type="text"

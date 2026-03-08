@@ -1,4 +1,4 @@
-import api from '@/services/api';
+import api from '@/app/services/api';
 import { SystemConfig } from '@/app/types/SystemConfig';
 
 export const getSystemConfig = async (): Promise<SystemConfig> => {

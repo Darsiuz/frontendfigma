@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Incident, IncidentStatus } from "@/app/types/Incident";
 import type { User } from "@/app/types/User";
 
-import * as IncidentService from "@/services/incident.service";
+import * as IncidentService from "@/app/services/incident.service";
 import { canViewIncidents } from "@/app/utils/permissions";
 
 interface UseIncidentsProps {

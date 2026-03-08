@@ -3,6 +3,9 @@ import { Plus, ArrowUpCircle, ArrowDownCircle, X, Calendar, Download, Activity }
 import { Movement, MovementStatus, MovementType } from '@/app/types/Movement';
 import { canApproveMovement, canCreateMovement } from '@/app/utils/permissions';
 import { useAppContext } from '@/app/context/AppContext';
+import { FormField } from './forms/FormField';
+import { Select } from './forms/Select';
+import { Input } from './forms/Input';
 
 interface StockMovementsProps {
   onAddMovement: (movement: Omit<Movement, 'id' | 'date' | 'productName' | 'user' | 'status'>) => void;
@@ -131,33 +134,19 @@ export function StockMovements({ onAddMovement }: StockMovementsProps) {
       <div className="bg-white rounded-lg shadow p-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="relative">
-            <input
-              type="text"
-              placeholder="Buscar..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <Input type="text" placeholder="Buscar..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
+          <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
             <option value="all">Todos los tipos</option>
             <option value={MovementType.ENTRADA}>Entradas</option>
             <option value={MovementType.SALIDA}>Salidas</option>
-          </select>
-          <select
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
+          </Select>
+          <Select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}>
             <option value="all">Todas las fechas</option>
             <option value="today">Hoy</option>
             <option value="week">Última semana</option>
             <option value="month">Último mes</option>
-          </select>
+          </Select>
         </div>
       </div>
 
@@ -210,17 +199,17 @@ export function StockMovements({ onAddMovement }: StockMovementsProps) {
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-medium text-gray-900">{movement.productName}</h4>
                         <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${movement.type === MovementType.ENTRADA
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
                           }`}>
                           {movement.type === MovementType.ENTRADA ? 'Entrada' : 'Salida'}
                         </span>
                         {movement.status && (
                           <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${movement.status === MovementStatus.PENDIENTE
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : movement.status === MovementStatus.APROBADO
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-gray-100 text-gray-800'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : movement.status === MovementStatus.APROBADO
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-gray-100 text-gray-800'
                             }`}>
                             {movement.status === MovementStatus.PENDIENTE ? 'Pendiente' :
                               movement.status === MovementStatus.APROBADO ? 'Aprobado' : 'Rechazado'}
@@ -277,24 +266,17 @@ export function StockMovements({ onAddMovement }: StockMovementsProps) {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Producto *
-                </label>
-                <select
-                  required
-                  value={formData.productId}
-                  onChange={(e) => setFormData({ ...formData, productId: Number(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
+              <FormField label="Producto *">
+                <Select required value={formData.productId}
+                  onChange={(e) => setFormData({ ...formData, productId: Number(e.target.value) })} >
                   <option value={0}>Seleccionar producto...</option>
                   {products.map(product => (
                     <option key={product.id} value={product.id}>
                       {product.name} (Stock actual: {product.quantity})
                     </option>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </FormField>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -305,8 +287,8 @@ export function StockMovements({ onAddMovement }: StockMovementsProps) {
                     type="button"
                     onClick={() => setFormData({ ...formData, type: MovementType.ENTRADA })}
                     className={`flex items-center justify-center gap-2 px-4 py-3 border rounded-lg transition-all ${formData.type === MovementType.ENTRADA
-                        ? 'border-green-600 bg-green-50 text-green-700'
-                        : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      ? 'border-green-600 bg-green-50 text-green-700'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-50'
                       }`}
                   >
                     <ArrowUpCircle className="w-5 h-5" />
@@ -316,8 +298,8 @@ export function StockMovements({ onAddMovement }: StockMovementsProps) {
                     type="button"
                     onClick={() => setFormData({ ...formData, type: MovementType.SALIDA })}
                     className={`flex items-center justify-center gap-2 px-4 py-3 border rounded-lg transition-all ${formData.type === MovementType.SALIDA
-                        ? 'border-red-600 bg-red-50 text-red-700'
-                        : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      ? 'border-red-600 bg-red-50 text-red-700'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-50'
                       }`}
                   >
                     <ArrowDownCircle className="w-5 h-5" />
@@ -326,34 +308,19 @@ export function StockMovements({ onAddMovement }: StockMovementsProps) {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cantidad *
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  value={formData.quantity}
+              <FormField label="Cantidad *">
+                <Input type="number" required min="1" placeholder="0" value={formData.quantity}
                   onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0"
                 />
-              </div>
+              </FormField>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Motivo *
-                </label>
-                <textarea
-                  required
-                  value={formData.reason}
+              <FormField label="Motivo *">
+                <textarea required value={formData.reason} rows={3}
                   onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
                   placeholder="Ej: Compra a proveedor, Venta a cliente, Ajuste de inventario..."
                 />
-              </div>
+              </FormField>
 
               <div className="flex gap-3 pt-4">
                 <button

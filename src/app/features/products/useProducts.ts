@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import type { Product } from "@/app/types/Product";
 import type { User } from "@/app/types/User";
 
-import * as ProductService from "@/services/product.service";
+import * as ProductService from "@/app/services/product.service";
 import { canViewProduct } from "@/app/utils/permissions";
 
 interface UseProductsProps {
