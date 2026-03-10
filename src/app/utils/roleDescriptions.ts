@@ -1,7 +1,7 @@
-import type { View } from '@/app/types/View';
-import { VIEWS_CONFIG } from '@/app/utils/views.config';
-import { canAccessView } from '@/app/utils/sidebar.permissions';
-import type { AppUser } from '@/app/types/User';
+import type { View } from '@type/View';
+import type { AppUser } from '@type/User';
+import { VIEWS_CONFIG } from '@utils/views.config';
+import { canAccessView } from '@utils/sidebar.permissions';
 
 const ALL_ROLES: AppUser['role'][] = [
   'admin',

@@ -19,7 +19,9 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@*": ["src/app/*"],
+      "@type/*": ["src/app/types/*"]
     }
   },
   "include": ["src"]

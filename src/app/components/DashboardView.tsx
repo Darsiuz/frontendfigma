@@ -2,11 +2,11 @@ import { Package, TrendingUp, AlertTriangle, Activity, DollarSign, ArrowUpCircle
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { motion } from "motion/react";
 
-import { MovementStatus, MovementType, type Movement } from '@/app/types/Movement';
-import { useAppContext } from '@/app/context/AppContext';
-import { IncidentStatus } from '@/app/types/Incident';
-import { canViewIncidents, canViewMovements } from '@/app/utils/permissions';
-import { getCurrencySymbol } from '@/app/utils/currency';
+import { MovementStatus, MovementType } from '@type/Movement';
+import { IncidentStatus } from '@type/Incident';
+import { useAppContext } from '@context/AppContext';
+import { canViewIncidents, canViewMovements } from '@utils/permissions';
+import { getCurrencySymbol } from '@utils/currency';
 
 export function DashboardView() {
   const { currentUser: user, systemConfig, products, movements, incidents } = useAppContext();

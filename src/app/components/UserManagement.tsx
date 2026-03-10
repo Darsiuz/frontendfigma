@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { getUsers, createUser, updateUser, deleteUser, toggleUser } from "@/app/services/user.service";
+import { getUsers, createUser, updateUser, deleteUser, toggleUser } from "@services/user.service";
 import { Plus, Edit, Trash2, X, Shield, Mail, User as UserIcon, Check } from 'lucide-react';
-import type { AppUser, ApiUser } from '@/app/types/User';
-import { getAccessibleViewsForRole, ALL_ROLES_LIST } from '@/app/utils/roleDescriptions';
+import type { AppUser, ApiUser } from '@type/User';
+import { getAccessibleViewsForRole, ALL_ROLES_LIST } from '@utils/roleDescriptions';
 import { toast } from "sonner";
-import { ALL_ROLES, ROLE_CONFIG } from "../utils/role.config";
+import { ALL_ROLES, ROLE_CONFIG } from "@utils/role.config";
 import { Input } from "./forms/Input";
 import { FormField } from "./forms/FormField";
 import { Select } from "./forms/Select";
@@ -34,7 +34,6 @@ export function UserManagement() {
         setLoading(false);
       }
     };
-
     loadUsers();
   }, []);
 
@@ -259,13 +258,13 @@ export function UserManagement() {
       </div>
 
       {/* Información de permisos por rol */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-1 md:grid-cols-4 gap-4 `}>
         {ALL_ROLES_LIST.map(role => (
-          <div key={role} className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Shield className="w-5 h-5 text-gray-700" />
-              <h3 className="font-semibold text-gray-900 capitalize">
-                {role}
+          <div key={role} className={`${ROLE_CONFIG[role].color} rounded-lg shadow p-6`}>
+            <div className={`flex items-center gap-2 mb-4 ${ROLE_CONFIG[role].color.split(' ')[1]}`}>
+              <Shield className={`w-5 h-5`} />
+              <h3 className={`font-semibold capitalize`}>
+                {ROLE_CONFIG[role].label}
               </h3>
             </div>
 
@@ -273,9 +272,9 @@ export function UserManagement() {
               {getAccessibleViewsForRole(role).map((label, index) => (
                 <li
                   key={index}
-                  className="text-sm text-gray-600 flex items-center gap-2"
+                  className={`text-sm flex items-center gap-2 ${ROLE_CONFIG[role].color.split(' ')[1]}`}
                 >
-                  <div className="w-1.5 h-1.5 bg-gray-600 rounded-full" />
+                  <div className={`w-1.5 h-1.5 ${ROLE_CONFIG[role].color.split(' ')[0]} rounded-full `} />
                   {label}
                 </li>
               ))}

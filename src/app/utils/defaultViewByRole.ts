@@ -1,5 +1,5 @@
-import type { User } from '@/app/types/User';
-import type { View } from '@/app/types/View';
+import type { User } from '@type/User';
+import type { View } from '@type/View';
 
 export const getDefaultViewByRole = (user: User): View => {
   switch (user.role) {

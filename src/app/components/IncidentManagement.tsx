@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { AlertTriangle, Plus, X, Clock, CheckCircle, XCircle } from 'lucide-react';
-import { IncidentStatus, type Incident } from '@/app/types/Incident';
-import { canCreateIncident, canResolveIncident } from '@/app/utils/permissions';
-import { useAppContext } from '@/app/context/AppContext';
+import { IncidentStatus, type Incident } from '@type/Incident';
+import { canCreateIncident, canResolveIncident } from '@utils/permissions';
+import { useAppContext } from '@context/AppContext';
 import { FormField } from './forms/FormField';
 import { Select } from './forms/Select';
 import { Input } from './forms/Input';

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
-import { Incident, IncidentStatus } from "@/app/types/Incident";
-import type { User } from "@/app/types/User";
+import { type Incident, IncidentStatus } from "@type/Incident";
+import type { User } from "@type/User";
 
-import * as IncidentService from "@/app/services/incident.service";
-import { canViewIncidents } from "@/app/utils/permissions";
+import * as IncidentService from "@services/incident.service";
+import { canViewIncidents } from "@utils/permissions";
 
 interface UseIncidentsProps {
   user: User | null;

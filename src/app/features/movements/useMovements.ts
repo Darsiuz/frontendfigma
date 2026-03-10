@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import * as MovementService from "@/app/services/movement.service";
-import { Movement, MovementStatus, MovementType } from "@/app/types/Movement";
-import { Product } from "@/app/types/Product";
-import { User } from "@/app/types/User";
+import * as MovementService from "@services/movement.service";
+import { type Movement, MovementStatus, MovementType } from "@type/Movement";
+import type { Product } from "@type/Product";
+import type { User } from "@type/User";
 import { toast } from "sonner";
-import { canViewMovements } from "@/app/utils/permissions";
+import { canViewMovements } from "@utils/permissions";
 
 interface Props {
   user: User | null;

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Plus, ArrowUpCircle, ArrowDownCircle, X, Calendar, Download, Activity } from 'lucide-react';
-import { Movement, MovementStatus, MovementType } from '@/app/types/Movement';
-import { canApproveMovement, canCreateMovement } from '@/app/utils/permissions';
-import { useAppContext } from '@/app/context/AppContext';
+import { type Movement, MovementStatus, MovementType } from '@type/Movement';
+import { canApproveMovement, canCreateMovement } from '@utils/permissions';
+import { useAppContext } from '@context/AppContext';
 import { FormField } from './forms/FormField';
 import { Select } from './forms/Select';
 import { Input } from './forms/Input';

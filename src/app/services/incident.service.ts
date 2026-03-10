@@ -1,5 +1,5 @@
-import api from '@/app/services/api';
-import { Incident, IncidentStatus } from '@/app/types/Incident';
+import api from '@services/api';
+import { type Incident, IncidentStatus } from '@type/Incident';
 
 const mapStatus = (status?: string): IncidentStatus => {
   switch (status?.toUpperCase()) {

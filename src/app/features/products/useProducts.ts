@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
-import type { Product } from "@/app/types/Product";
-import type { User } from "@/app/types/User";
+import type { Product } from "@type/Product";
+import type { User } from "@type/User";
 
-import * as ProductService from "@/app/services/product.service";
-import { canViewProduct } from "@/app/utils/permissions";
+import * as ProductService from "@services/product.service";
+import { canViewProduct } from "@utils/permissions";
 
 interface UseProductsProps {
   user: User | null;

@@ -1,29 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Login } from '@/app/components/Login';
-import { Sidebar } from '@/app/components/Sidebar';
-import { DashboardView } from '@/app/components/DashboardView';
-import { InventoryManagement } from '@/app/components/InventoryManagement';
-import { StockMovements } from '@/app/components/StockMovements';
-import { UserManagement } from '@/app/components/UserManagement';
-import { Reports } from '@/app/components/Reports';
-import { ProductForm } from '@/app/components/ProductForm';
-import { SystemSettings } from '@/app/components/SystemSettings';
-import { IncidentManagement } from '@/app/components/IncidentManagement';
-import { ApproveMovements } from '@/app/components/ApproveMovements';
-import { getDefaultViewByRole } from '@/app/utils/defaultViewByRole';
-import { getViewLabel } from '@/app/utils/views.config';
-
-import { Product } from '@/app/types/Product';
-
-import { canAccessView } from '@/app/utils/sidebar.permissions';
-
-import type { View } from '@/app/types/View';
-import { useMovements } from '@/app/features/movements/useMovements';
-import { useIncidents } from '@/app/features/incidents/useIncidents';
-import { useProducts } from '@/app/features/products/useProducts';
-import { useSystemConfig } from '@/app/features/system/useSystemConfig';
-import { useAuth } from "@/app/features/auth/useAuth";
-import { AppProvider } from '@/app/context/AppContext';
+import { Login } from '@components/Login';
+import { Sidebar } from '@components/Sidebar';
+import { DashboardView } from '@components/DashboardView';
+import { InventoryManagement } from '@components/InventoryManagement';
+import { StockMovements } from '@components/StockMovements';
+import { UserManagement } from '@components/UserManagement';
+import { Reports } from '@components/Reports';
+import { ProductForm } from '@components/ProductForm';
+import { SystemSettings } from '@components/SystemSettings';
+import { IncidentManagement } from '@components/IncidentManagement';
+import { ApproveMovements } from '@components/ApproveMovements';
+import { getDefaultViewByRole } from '@utils/defaultViewByRole';
+import { getViewLabel } from '@utils/views.config';
+import { canAccessView } from '@utils/sidebar.permissions';
+import type { Product } from '@type/Product';
+import type { View } from '@type/View';
+import { useMovements } from '@features/movements/useMovements';
+import { useIncidents } from '@features/incidents/useIncidents';
+import { useProducts } from '@features/products/useProducts';
+import { useSystemConfig } from '@features/system/useSystemConfig';
+import { useAuth } from "@features/auth/useAuth";
+import { AppProvider } from '@context/AppContext';
 
 function App() {
   const { isLoggedIn, currentUser, authLoading, handleLogin, handleLogout, } = useAuth();

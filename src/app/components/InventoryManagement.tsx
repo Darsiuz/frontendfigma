@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Search, Plus, Edit, Trash2, Package } from 'lucide-react';
-import { Product } from '@/app/types/Product';
-import { canCreateProduct, canEditProduct, canDeleteProduct } from '@/app/utils/permissions';
-import { getCurrencySymbol } from '@/app/utils/currency';
-import { useAppContext } from '@/app/context/AppContext';
+import type { Product } from '@type/Product';
+import { canCreateProduct, canEditProduct, canDeleteProduct } from '@utils/permissions';
+import { getCurrencySymbol } from '@utils/currency';
+import { useAppContext } from '@context/AppContext';
 import { Input } from './forms/Input';
 import { Select } from './forms/Select';
 

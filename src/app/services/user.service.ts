@@ -1,5 +1,5 @@
-import api from "./api";
-import { ApiUser } from "@/app/types/User";
+import api from "@services/api";
+import { ApiUser } from "@type/User";
 
 export const getUsers = async (): Promise<ApiUser[]> => {
   const res = await api.get<ApiUser[]>("/admin/users");

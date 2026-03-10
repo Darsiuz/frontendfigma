@@ -1,9 +1,9 @@
 import { createContext, useContext } from 'react';
-import type { Product } from '@/app/types/Product';
-import type { Movement } from '@/app/types/Movement';
-import type { Incident } from '@/app/types/Incident';
-import type { SystemConfig } from '@/app/types/SystemConfig';
-import { User } from '@/app/types/User';
+import type { Product } from '@type/Product';
+import type { Movement } from '@type/Movement';
+import type { Incident } from '@type/Incident';
+import type { SystemConfig } from '@type/SystemConfig';
+import type { User } from '@type/User';
 
 interface AppContextType {
   currentUser: User;

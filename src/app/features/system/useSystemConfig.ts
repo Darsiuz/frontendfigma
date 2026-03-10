@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
-import type { SystemConfig } from "@/app/types/SystemConfig";
-import type { User } from "@/app/types/User";
+import type { SystemConfig } from "@type/SystemConfig";
+import type { User } from "@type/User";
 
-import * as SystemConfigService from "@/app/services/systemConfig.service";
-import { canViewSystemSettings, canEditSystemSettings } from "@/app/utils/permissions";
+import * as SystemConfigService from "@services/systemConfig.service";
+import { canViewSystemSettings, canEditSystemSettings } from "@utils/permissions";
 
 interface UseSystemConfigProps {
     user: User | null;

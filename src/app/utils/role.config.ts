@@ -1,4 +1,4 @@
-import type { UserRole } from '@/app/types/User';
+import type { UserRole } from '@type/User';
 
 export const ROLE_CONFIG: Record<UserRole, {
   label: string;

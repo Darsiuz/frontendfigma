@@ -1,16 +1,10 @@
 import { Download, FileText, TrendingUp, Package, DollarSign } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend, PieChart, Pie, Cell } from 'recharts';
-import { MovementStatus, MovementType } from '@/app/types/Movement';
-import { getCurrencySymbol } from '@/app/utils/currency';
-import { useAppContext } from '../context/AppContext';
-
-// interface ReportsProps {
-//   products: Product[];
-//   movements: Movement[];
-// }
+import { MovementStatus, MovementType } from '@type/Movement';
+import { getCurrencySymbol } from '@utils/currency';
+import { useAppContext } from '@context/AppContext';
 
 export function Reports() {
-  //mm es para no confundir el contexto con el estado local de movimientos que se usará para los calculos de reportes.
   const { systemConfig, products, movements: mm } = useAppContext();
   const movements = mm.filter(m => m.status === MovementStatus.APROBADO);
 

@@ -1,5 +1,5 @@
-import api from '@/app/services/api';
-import { Movement, MovementStatus } from '@/app/types/Movement';
+import api from '@services/api';
+import { type Movement, MovementStatus } from '@type/Movement';
 
 const mapStatus = (status?: string): MovementStatus =>
   status?.toUpperCase() as MovementStatus ?? MovementStatus.PENDIENTE;

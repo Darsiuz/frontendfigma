@@ -1,5 +1,5 @@
-import api from '@/app/services/api';
-import { SystemConfig } from '@/app/types/SystemConfig';
+import api from '@services/api';
+import type { SystemConfig } from '@type/SystemConfig';
 
 export const getSystemConfig = async (): Promise<SystemConfig> => {
   const { data } = await api.get('/admin/system');

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Package, Lock, Mail, Eye, EyeOff } from 'lucide-react';
-import { FormField } from '@/app/components/forms/FormField';
-import { Input } from '@/app/components/forms/Input';
+import { FormField } from '@components/forms/FormField';
+import { Input } from '@components/forms/Input';
 
 interface LoginProps {
   onLogin: (email: string, password: string) => void;

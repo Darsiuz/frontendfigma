@@ -1,6 +1,6 @@
-import type { User as U } from '@/app/types/User';
-import type { View } from '@/app/types/View';
-import { ADMIN, MANAGER, OPERATOR, AUDITOR } from '@/app/utils/permissions';
+import type { User as U } from '@type/User';
+import type { View } from '@type/View';
+import { ADMIN, MANAGER, OPERATOR, AUDITOR } from '@utils/permissions';
 
 // ACA SE DEFINE QUIEN PUEDE VER CADA ITEM DEL SIDEBAR, ESTO SE HACE EN BASE AL ROL DEL USUARIO
 export const canAccessView = (u: U, view: View): boolean => {

@@ -1,4 +1,4 @@
-import { ViewConfig, type View } from '@/app/types/View';
+import { ViewConfig, type View } from '@type/View';
 import { LayoutDashboard, Package, TrendingUp, Users, FileText, Settings, AlertTriangle, CheckCircle } from 'lucide-react';
 
 // ACA SE CAMBIA EL ORDEN DE LOS ITEMS EN EL SIDEBAR, ASI COMO LOS ICONOS Y LOS LABELS

@@ -1,9 +1,10 @@
 import { Package, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { View } from '@/app/types/View';
-import { canAccessView } from '@/app/utils/sidebar.permissions';
-import { VIEWS_CONFIG } from '@/app/utils/views.config';
+import type { View } from '@type/View';
+import { canAccessView } from '@utils/sidebar.permissions';
+import { VIEWS_CONFIG } from '@utils/views.config';
+import { ROLE_CONFIG } from '@utils/role.config';
 import { motion } from 'motion/react';
-import { useAppContext } from '@/app/context/AppContext';
+import { useAppContext } from '@context/AppContext';
 
 interface SidebarProps {
   currentView: View;
@@ -19,23 +20,11 @@ export function Sidebar({ currentView, onNavigate, onLogout, isCollapsed, onTogg
   const visibleMenuItems = VIEWS_CONFIG.filter(view => canAccessView(user, view.id));
 
   const getRoleLabel = (role: string) => {
-    const roles: { [key: string]: string } = {
-      admin: 'Administrador',
-      manager: 'Manager',
-      operator: 'Operador',
-      auditor: 'Auditor'
-    };
-    return roles[role] || role;
+    return ROLE_CONFIG[role as keyof typeof ROLE_CONFIG]?.label || role;
   };
 
   const getRoleBadgeColor = (role: string) => {
-    const colors: { [key: string]: string } = {
-      admin: 'bg-purple-100 text-purple-800',
-      manager: 'bg-blue-100 text-blue-800',
-      operator: 'bg-green-100 text-green-800',
-      auditor: 'bg-orange-100 text-orange-800'
-    };
-    return colors[role] || 'bg-gray-100 text-gray-800';
+    return ROLE_CONFIG[role as keyof typeof ROLE_CONFIG]?.color || 'bg-gray-100 text-gray-800';
   };
 
   return (
@@ -151,7 +140,7 @@ export function Sidebar({ currentView, onNavigate, onLogout, isCollapsed, onTogg
             transition={{ duration: 10.0 }}
             className="text-xs text-gray-400"
           >
-            v {__APP_VERSION__}
+            v. {__APP_VERSION__}
           </motion.p>
         )}
       </div>
@@ -160,7 +149,8 @@ export function Sidebar({ currentView, onNavigate, onLogout, isCollapsed, onTogg
       <div className="p-4 border-t border-gray-200">
         <button
           onClick={onLogout}
-          className={`w-full flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors ${isCollapsed ? 'justify-center' : ''
+          className={`w-full flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors
+            ${isCollapsed ? 'justify-center' : ''
             }`}
           title={isCollapsed ? 'Cerrar Sesión' : ''}
         >

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { Product } from '@/app/types/Product';
-import { getCurrencySymbol } from '@/app/utils/currency';
-import { useAppContext } from '@/app/context/AppContext';
-import { FormField } from '@/app/components/forms/FormField';
-import { Input } from '@/app/components/forms/Input';
+import type { Product } from '@type/Product';
+import { getCurrencySymbol } from '@utils/currency';
+import { useAppContext } from '@context/AppContext';
+import { FormField } from '@components/forms/FormField';
+import { Input } from '@components/forms/Input';
 
 interface ProductFormProps {
   isOpen: boolean;

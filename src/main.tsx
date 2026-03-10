@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
-import App from "./app/App";
-import "./styles/index.css";
-import { Toaster } from "@/app/components/ui/sonner";
+import App from "@@/App";
+import "@/styles/index.css";
+import { Toaster } from "@components/ui/sonner";
 
 createRoot(document.getElementById("root")!).render(
   <>

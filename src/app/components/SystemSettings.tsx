@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Settings, Save, RotateCcw } from 'lucide-react';
-import { SystemConfig } from '@/app/types/SystemConfig';
+import type { SystemConfig } from '@type/SystemConfig';
 import { toast } from "sonner";
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '@context/AppContext';
 
 interface SystemSettingsProps {
   onSave: (config: SystemConfig) => void;

@@ -1,4 +1,4 @@
-import { User as U } from '@/app/types/User';
+import type { User as U } from '@type/User';
 
 export const ADMIN = (u: U) => u.role === 'admin';
 export const MANAGER = (u: U) => u.role === 'manager';
