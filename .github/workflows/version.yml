@@ -12,9 +12,14 @@ jobs:
   increment-version:
     runs-on: ubuntu-latest
 
+    # Evita loop cuando el commit lo hace github-actions
+    if: github.actor != 'github-actions[bot]'
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -29,20 +34,25 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Check working directory status
+      - name: Detect version type
+        id: version_type
         run: |
-          if ! git diff-index --quiet HEAD --; then
-            git stash
+          MESSAGE=$(git log -1 --pretty=%B)
+
+          if [[ "$MESSAGE" == *"#major"* ]]; then
+            echo "TYPE=major" >> $GITHUB_ENV
+          elif [[ "$MESSAGE" == *"#minor"* ]]; then
+            echo "TYPE=minor" >> $GITHUB_ENV
+          else
+            echo "TYPE=patch" >> $GITHUB_ENV
           fi
 
       - name: Increment version
-        id: increment_version
         run: |
-          NEW_VERSION=$(npm version patch -m "Incrementando Version a %s")
+          NEW_VERSION=$(npm version $TYPE -m "Incrementando Version a %s")
           echo "New version: $NEW_VERSION"
-          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-          echo "name=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Push changes
         run: |
           git push
+          git push --tags

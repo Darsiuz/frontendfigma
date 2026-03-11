@@ -173,7 +173,7 @@ export function DashboardView() {
       {notificationsEnabled && lowStockProducts > 0 && (
         <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-6 h-6 text-orange-600 flex-shrink-0 mt-1" />
+            <AlertTriangle className="w-6 h-6 text-orange-600 shrink-0 mt-1" />
             <div className="flex-1">
               <h3 className="font-semibold text-orange-900 mb-2">
                 Alerta: {lowStockProducts} {lowStockProducts === 1 ? 'producto tiene' : 'productos tienen'} stock bajo
@@ -229,7 +229,7 @@ export function DashboardView() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent = 0 }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"

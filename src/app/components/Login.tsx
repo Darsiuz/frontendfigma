@@ -29,7 +29,7 @@ export function Login({ onLogin }: LoginProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo y título */}
         <div className="text-center mb-8">

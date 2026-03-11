@@ -175,7 +175,7 @@ export function Reports() {
 
       {/* Resumen ejecutivo */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow p-6 text-white">
+        <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-lg shadow p-6 text-white">
           <div className="flex items-center justify-between mb-2">
             <Package className="w-8 h-8 opacity-80" />
           </div>
@@ -183,7 +183,7 @@ export function Reports() {
           <p className="text-3xl font-bold mt-1">{totalProducts}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow p-6 text-white">
+        <div className="bg-linear-to-br from-green-500 to-green-600 rounded-lg shadow p-6 text-white">
           <div className="flex items-center justify-between mb-2">
             <DollarSign className="w-8 h-8 opacity-80" />
           </div>
@@ -191,7 +191,7 @@ export function Reports() {
           <p className="text-3xl font-bold mt-1">{currencySymbol} {totalValue.toLocaleString()}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow p-6 text-white">
+        <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-lg shadow p-6 text-white">
           <div className="flex items-center justify-between mb-2">
             <TrendingUp className="w-8 h-8 opacity-80" />
           </div>
@@ -199,7 +199,7 @@ export function Reports() {
           <p className="text-3xl font-bold mt-1">{lowStockCount}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow p-6 text-white">
+        <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-lg shadow p-6 text-white">
           <div className="flex items-center justify-between mb-2">
             <FileText className="w-8 h-8 opacity-80" />
           </div>
@@ -236,7 +236,7 @@ export function Reports() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ category, value }) => `${category}: ${currencySymbol} ${value.toLocaleString()}`}
+                label={({ payload, value }) => `${payload?.category ?? ''}: ${currencySymbol} ${Number(value ?? 0).toLocaleString()}`}
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"
