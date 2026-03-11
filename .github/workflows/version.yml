@@ -1,4 +1,4 @@
-name: Auto Version
+name: Increment Version
 
 on:
   push:
@@ -9,19 +9,19 @@ permissions:
   contents: write
 
 jobs:
-  version:
+  increment-version:
     runs-on: ubuntu-latest
 
+    # Evita loop cuando el commit lo hace github-actions
     if: github.actor != 'github-actions[bot]'
 
     steps:
-      - name: Checkout
+      - name: Check out code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "24"
@@ -34,33 +34,25 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Get commit message
-        id: commit
+      - name: Detect version type
+        id: version_type
         run: |
           MESSAGE=$(git log -1 --pretty=%B)
-          echo "MESSAGE<<EOF" >> $GITHUB_OUTPUT
-          echo "$MESSAGE" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Determine version bump
-        id: bump
-        run: |
-          MESSAGE="${{ steps.commit.outputs.MESSAGE }}"
-
-          if [[ "$MESSAGE" == *"BREAKING CHANGE"* ]] || [[ "$MESSAGE" == *"!"* ]]; then
+          if [[ "$MESSAGE" == *"#major"* ]]; then
             echo "TYPE=major" >> $GITHUB_ENV
-          elif [[ "$MESSAGE" == feat* ]]; then
+          elif [[ "$MESSAGE" == *"#minor"* ]]; then
             echo "TYPE=minor" >> $GITHUB_ENV
           else
             echo "TYPE=patch" >> $GITHUB_ENV
           fi
 
-      - name: Bump version
+      - name: Increment version
         run: |
-          NEW_VERSION=$(npm version $TYPE -m "chore: release %s")
+          NEW_VERSION=$(npm version $TYPE -m "Incrementando Version a %s")
           echo "New version: $NEW_VERSION"
 
-      - name: Push
+      - name: Push changes
         run: |
           git push
           git push --tags
