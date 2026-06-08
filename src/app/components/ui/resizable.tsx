@@ -20,7 +20,7 @@ const ResizeHandleComponent =
 
 if (!ResizeHandleComponent) {
   throw new Error(
-    'The installed version of "react-resizable-panels" does not export a resize handle component.',
+    'La versión instalada de "react-resizable-panels" no exporta un componente de control de redimensionamiento.',
   );
 }
 

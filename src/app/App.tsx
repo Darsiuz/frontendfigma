@@ -21,6 +21,7 @@ import { useProducts } from '@features/products/useProducts';
 import { useSystemConfig } from '@features/system/useSystemConfig';
 import { useAuth } from "@features/auth/useAuth";
 import { AppProvider } from '@context/AppContext';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@components/ui/resizable";
 
 function App() {
   const { isLoggedIn, currentUser, authLoading, handleLogin, handleLogout, } = useAuth();
@@ -85,6 +86,7 @@ function App() {
         />
 
         <div className="flex-1 flex flex-col overflow-hidden">
+
           <header className="bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
               <div>
@@ -134,15 +136,14 @@ function App() {
               </>
             )}
           </main>
+
         </div>
 
-        <ProductForm
-          isOpen={isProductFormOpen}
+        <ProductForm isOpen={isProductFormOpen}
           onClose={() => { setIsProductFormOpen(false); setEditingProduct(null); setFormErrors({}); }}
-          onSave={(data) =>
-            editingProduct
-              ? handleEditProduct(editingProduct.id, data)
-              : handleAddProduct(data)
+          onSave={(data) => editingProduct
+            ? handleEditProduct(editingProduct.id, data)
+            : handleAddProduct(data)
           }
           editProduct={editingProduct}
           formErrors={formErrors}

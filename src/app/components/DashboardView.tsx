@@ -7,6 +7,7 @@ import { IncidentStatus } from '@type/Incident';
 import { useAppContext } from '@context/AppContext';
 import { canViewIncidents, canViewMovements } from '@utils/permissions';
 import { getCurrencySymbol } from '@utils/currency';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@components/ui/resizable";
 
 export function DashboardView() {
   const { currentUser: user, systemConfig, products, movements, incidents } = useAppContext();
@@ -18,17 +19,11 @@ export function DashboardView() {
   const currencySymbol = getCurrencySymbol(systemConfig?.currency);
 
   // Filtrar movimientos aprobados para actividad reciente
-  const approvedMovements = movements.filter(
-    m => m.status === MovementStatus.APROBADO
-  );
+  const approvedMovements = movements.filter(m => m.status === MovementStatus.APROBADO);
 
-  const pendingMovements = movements.filter(
-    m => m.status === MovementStatus.PENDIENTE
-  ).length;
+  const pendingMovements = movements.filter(m => m.status === MovementStatus.PENDIENTE).length;
 
-  const pendingIncidents = incidents.filter(
-    i => i.status === IncidentStatus.PENDIENTE
-  ).length;
+  const pendingIncidents = incidents.filter(i => i.status === IncidentStatus.PENDIENTE).length;
 
   const todayMovements = approvedMovements.filter(m => {
     const today = new Date();
@@ -64,7 +59,6 @@ export function DashboardView() {
       const movDate = new Date(m.date);
       return movDate.toDateString() === date.toDateString();
     });
-
     return {
       date: date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
       entradas: dayMovements.filter(m => m.type === MovementType.ENTRADA).reduce((sum, m) => sum + m.quantity, 0),
@@ -73,9 +67,7 @@ export function DashboardView() {
   });
 
   // Top 5 productos más valiosos
-  const topProducts = [...products]
-    .sort((a, b) => (b.quantity * b.price) - (a.quantity * a.price))
-    .slice(0, 5);
+  const topProducts = [...products].sort((a, b) => (b.quantity * b.price) - (a.quantity * a.price)).slice(0, 5);
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
@@ -84,89 +76,107 @@ export function DashboardView() {
   return (
     <div className="space-y-6">
       {/* Estadísticas principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-gray-600">Total Productos</p>
-            <Package className="w-5 h-5 text-blue-600" />
+      <ResizablePanelGroup direction='horizontal'>
+        <ResizablePanel collapsible defaultSize={1}></ResizablePanel>
+        <ResizableHandle className='bg-accent' />
+        <ResizablePanel defaultSize={20}>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-600">Total Productos</p>
+              <Package className="w-5 h-5 text-blue-600" />
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{totalProducts}</p>
+            <p className="text-xs text-gray-500 mt-1">Registrados en sistema</p>
           </div>
-          <p className="text-3xl font-bold text-gray-900">{totalProducts}</p>
-          <p className="text-xs text-gray-500 mt-1">Registrados en sistema</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-gray-600">Total Unidades</p>
-            <Activity className="w-5 h-5 text-green-600" />
+        </ResizablePanel>
+        <ResizableHandle className='bg-accent m-1' />
+        <ResizablePanel defaultSize={20}>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-600">Total Unidades</p>
+              <Activity className="w-5 h-5 text-green-600" />
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{totalUnits.toLocaleString()}</p>
+            <p className="text-xs text-gray-500 mt-1">En inventario</p>
           </div>
-          <p className="text-3xl font-bold text-gray-900">{totalUnits.toLocaleString()}</p>
-          <p className="text-xs text-gray-500 mt-1">En inventario</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-gray-600">Valor Total</p>
-            <DollarSign className="w-5 h-5 text-purple-600" />
+        </ResizablePanel>
+        <ResizableHandle className='bg-accent' />
+        <ResizablePanel defaultSize={20}>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-600">Valor Total</p>
+              <DollarSign className="w-5 h-5 text-purple-600" />
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{currencySymbol} {totalValue.toLocaleString()}</p>
+            <p className="text-xs text-gray-500 mt-1">Valor del inventario</p>
           </div>
-          <p className="text-3xl font-bold text-gray-900">{currencySymbol} {totalValue.toLocaleString()}</p>
-          <p className="text-xs text-gray-500 mt-1">Valor del inventario</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-gray-600">Stock Bajo</p>
-            <AlertTriangle className="w-5 h-5 text-orange-600" />
+        </ResizablePanel>
+        <ResizableHandle className='bg-accent' />
+        <ResizablePanel defaultSize={20}>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-600">Stock Bajo</p>
+              <AlertTriangle className="w-5 h-5 text-orange-600" />
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{lowStockProducts}</p>
+            <p className="text-xs text-gray-500 mt-1">Requieren atención</p>
           </div>
-          <p className="text-3xl font-bold text-gray-900">{lowStockProducts}</p>
-          <p className="text-xs text-gray-500 mt-1">Requieren atención</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-gray-600">Movimientos Hoy</p>
-            <TrendingUp className="w-5 h-5 text-indigo-600" />
+        </ResizablePanel>
+        <ResizableHandle className='bg-accent' />
+        <ResizablePanel defaultSize={20}>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-600">Movimientos Hoy</p>
+              <TrendingUp className="w-5 h-5 text-indigo-600" />
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{todayMovements}</p>
+            <p className="text-xs text-gray-500 mt-1">Registrados hoy</p>
           </div>
-          <p className="text-3xl font-bold text-gray-900">{todayMovements}</p>
-          <p className="text-xs text-gray-500 mt-1">Registrados hoy</p>
-        </div>
-      </div>
+        </ResizablePanel>
+        <ResizableHandle className='bg-accent' />
+        <ResizablePanel collapsible></ResizablePanel>
+      </ResizablePanelGroup>
 
       {notificationsEnabled && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ResizablePanelGroup direction='horizontal' autoSaveId='dashboard-notifications'>
+          <ResizablePanel id='dashboard-notifications-movements' minSize={10} defaultSize={50}>
+            {/* Alertas de movimientos pendientes */}
+            {canViewMovements(user) && pendingMovements > 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                <p className="text-sm text-yellow-700">Movimientos Pendientes</p>
+                <motion.p
+                  key={pendingMovements}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="text-3xl font-bold text-yellow-800"
+                >
+                  {pendingMovements}
+                </motion.p>
+              </div>
+            )}
+          </ResizablePanel>
 
-          {/* Alertas de movimientos pendientes */}
-          {canViewMovements(user) && pendingMovements > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-              <p className="text-sm text-yellow-700">Movimientos Pendientes</p>
-              <motion.p
-                key={pendingMovements}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className="text-3xl font-bold text-yellow-800"
-              >
-                {pendingMovements}
-              </motion.p>
-            </div>
-          )}
+          <ResizableHandle className="m-3 bg-accent" />
 
-          {/* Alertas de incidencias pendientes */}
-          {canViewIncidents(user) && pendingIncidents > 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-              <p className="text-sm text-red-700">Incidencias Pendientes</p>
-              <motion.p
-                key={pendingIncidents}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className="text-3xl font-bold text-red-800"
-              >
-                {pendingIncidents}
-              </motion.p>
-            </div>
-          )}
-
-        </div>
+          <ResizablePanel id='dashboard-notifications-incidents' minSize={10} defaultSize={50}>
+            {/* Alertas de incidencias pendientes */}
+            {canViewIncidents(user) && pendingIncidents > 0 && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                <p className="text-sm text-red-700">Incidencias Pendientes</p>
+                <motion.p
+                  key={pendingIncidents}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="text-3xl font-bold text-red-800"
+                >
+                  {pendingIncidents}
+                </motion.p>
+              </div>
+            )}
+          </ResizablePanel>
+        </ResizablePanelGroup>
       )}
 
       {/* Alertas de stock bajo */}
